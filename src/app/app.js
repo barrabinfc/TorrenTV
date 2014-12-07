@@ -1,11 +1,15 @@
-var browser = require( 'airplay-js' ).createBrowser();
-var browserXbmc = require( 'airplay-xbmc' ).createBrowser();
 var readTorrent = require( 'read-torrent' );
 var numeral = require('numeral');
+
 var gui = require('nw.gui');
 var emitter = gui.Window.get();
-var chromecastjs = require('chromecast-js')
-var subtitles_server = new (require("subtitles-server"))()
+
+var browser = require( 'airplay-js' ).createBrowser();
+var browserXbmc = require( 'airplay-xbmc' ).createBrowser();
+var chromecastjs = require('chromecast-js');
+var VLC = require('./vlc')
+
+//var subtitles_server = new (require("./subtitlesServer.js"))()
 var srt2vtt2 = require('srt2vtt2')
 var scfs = new (require("simple-cors-file-server"))()
 
@@ -19,6 +23,9 @@ var execPath = path.dirname( process.execPath );
 console.log(execPath)
 
 
+/* 
+ * Auto Updating service
+ */
 var updater = require('nw-updater')({'channel':'beta', "currentVersion": currentVersion,'endpoint':'http://torrentv.github.io/update.json'})
 updater.update()
 
@@ -31,6 +38,7 @@ updater.on("installed", function(){
 updater.on("error", function(msj){
     console.log(msj)
 })
+
 
 
 var chromecaster = new chromecastjs.Browser()
@@ -134,14 +142,23 @@ var download = function(url, dest, cb) {
   });
 }
 
+
+// Devices who can play (chromecast/airplay/vlc)
+// TODO:
+//  Should do prefetch of devices every torrent start.
+//  And also has a list with devices enabled and disabled, ordered
 var device = ""
 var devices = []
+
 var movieName = ""
 var movieHash = ""
+
 var intervalArr = new Array();
 var loading = false;
 var loadingPlayer = false;
 var subtitlesDropped = false;
+
+// Global list of ips ?
 var ips = []
 var dirname_prev = ""
 var basename_prev = ""
@@ -271,11 +288,11 @@ doc.ondrop = function (event) {
             if(new_torrent.toLowerCase().substring(new_torrent.length-3,new_torrent.length).indexOf('srt')>-1){
                 console.log("converting srt and then creating server for: "+new_torrent)
                 srt2vtt2(new_torrent, function(err, data){
-                    subtitles_server.start(data, function(){console.log("server restarted.")})
+                    //subtitles_server.start(data, function(){console.log("server restarted.")})
                 })
             }else{
                 console.log("creating server for: "+new_torrent)
-                subtitles_server.start({vtt: new_torrent, encoding: 'utf8'}, function(){console.log("server restarted.")})
+                //subtitles_server.start({vtt: new_torrent, encoding: 'utf8'}, function(){console.log("server restarted.")})
             }
 
             subtitles_resource = 'http://'+address()+':8888/subtitles.vtt'
@@ -561,8 +578,21 @@ browserXbmc.on( 'deviceOn', function( device ) {
      emitter.emit('wantToPlay');
    }
 });
-
 browserXbmc.start();
+
+
+// VLC Support
+setTimeout(  function(){
+    vlc_device = new VLC.Device({addresses: 'vlc', name: 'VLC app'});
+    ips.push(vlc_device.addresses);
+
+    addDeviceElement('VLC app');
+
+    vlc_device.active = true;
+    self.devices.push(vlc_device);
+
+     emitter.emit('wantToPlay');
+} , 3000 );
 
 
 function killIntervals(){
