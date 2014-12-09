@@ -20,7 +20,7 @@ Settings.auto_update = true;
 Settings.remove_downloads_on_exit = true;
 
 Settings.devices = {
-    default: 'vlc',
+    default: 'xbmc',
     roku: {
         enabled: false,
         port:    9009,

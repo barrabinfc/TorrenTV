@@ -56,7 +56,7 @@ launchTest = function(args){
                     {timeout: 100});
 
     child.on('close',function(code,signal){
-        if(code !== 0 || signal !== null) 
+        if(code != 0 || signal !== null) 
             defered.reject(new Error(("Vlc is not installed...",signal)))
         else defered.resolve(true)
     });

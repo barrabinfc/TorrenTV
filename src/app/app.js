@@ -156,7 +156,6 @@ TorrenTV.prototype.playTorrent = function(torrent_file){
 
     //  Select every file to download
     self.torrent.on('discovered-files',function(tor_files){
-        console.trace()
         tor_files.forEach( function(file,i,files){
             console.info( file.name );
             file.select()
@@ -178,7 +177,7 @@ TorrenTV.prototype.playFile = function(local_file){
 TorrenTV.prototype.play = function( video_stream_uri, device ){
     var self = this;
 
-    var dev = (device  !== undefined ? device : self.default_device );
+    var dev = (device  != undefined ? device : self.default_device );
 
     try {
         dev.play(video_stream_uri);
@@ -197,7 +196,7 @@ TorrenTV.prototype.torrentProgress = function( torrent ){
 }
 
 TorrenTV.prototype.updateDevicesOnScreen = function(device, dev_name){
-    // A new wild device appeared
+    // A wild device appeared
 }
 
 
@@ -316,7 +315,7 @@ TorrenTV.prototype.deviceOff = function(device, server_name){
                       (device.name !== undefined ? device.name : server_name));
 
     if(! _.has(self.devices, device_uri )){
-        console.log("newDevice: ", device_uri);
+        console.log("deviceOff: ", device_uri);
         delete self.devices[device_uri] 
     }
 }
@@ -552,3 +551,10 @@ win.on('loaded', function(){
         win.showDevTools();
     });
 })
+
+// SIGTERM AND SIGINT will trigger the exit event.
+process.once("SIGTERM", function () {
+    console.log("SIGTERM");
+    console.trace()
+    process.exit(0);
+});

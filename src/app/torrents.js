@@ -47,6 +47,7 @@ Torrents.prototype.init = function(options){
     var self = this;
     self.config = options;
     self.loading = false;
+    self.engine = null;
 }
 
 Torrents.prototype.cleanCache = function(cb){
@@ -59,6 +60,9 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
 
     var self = this;
     var defer = Q.defer()
+
+    console.info(self.engine);
+    console.assert(self.engine != null, "A torrent is already downloadiiiing, bitch!");
 
     var engine = peerflix(torrent_file, {})
     self.engine = engine;
@@ -84,6 +88,7 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
         // Yepa, we have a stream on this address
         console.log('Torrent-Streaming file is listening at address: ', href)
         Settings.address = href;
+        self.loading = false;
 
         // Updating is based on setInterval
         defer.resolve(href)
@@ -112,9 +117,10 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
         self.hotswaps++;
     });
     engine.on('uninterested', function(){
+        clearTimeout(self.update_timer);
         if(engine) self.engine.swarm.pause();
     })
-    engine.on('insterested', function(){
+    engine.on('interested', function(){
         if(engine) self.engine.swarm.resume();
     })
 
@@ -122,7 +128,7 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
         // Swarm started
     });
 
-    self.update_timer = setTimeout( function(){
+    self.update_timer = setInterval( function(){
         defer.notify( self );
     }, 1000.0/Settings.TORRENT_WATCHING_TIMER )
 
