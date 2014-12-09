@@ -1,22 +1,25 @@
 var http = require('http');
 var mu = require('mu2');
 var util = require('util');
-var events = require('events')
+var events = require('events');
 
 var RokuDevice = function(options){
     events.EventEmitter.call(this);
-    var self = this;
-    self.info   = ['https://owner.roku.com/add/KHN8M']
-    self.name   = 'roku'
-    self.config = options;
-    this.init();
+    this.init(options);
 }
 util.inherits( RokuDevice, events.EventEmitter )
 
 
-RokuDevice.prototype.init = function(){
+RokuDevice.prototype.init = function(options){
+    var self = this;
     mu.root = 'src/app/';
 
+    self.info   = ['https://owner.roku.com/add/KHN8M']
+    self.name   = 'roku'
+    self.config = options;
+}
+
+RokuDevice.prototype.start = function(){
     this.emit('deviceOn', self );
 }
 

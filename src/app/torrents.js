@@ -1,6 +1,5 @@
 var address = require('network-address');
 var qs      = require('querystring');
-var readTorrent = require( 'read-torrent' );
 var peerflix    = require('peerflix')
 var Q       = require('q');
 var util    = require('util')
@@ -14,37 +13,39 @@ var events = require('events');
  * Create a new instance...
  *
  * torrents = new Torrents()
- * torrents.processTorrent( torrent_file ).then( function(movieName, movieHash){
- *   // here you can browse the file list of the torrent, if you wish...
- *
  *
  *   // Download the torrent
- *   torrets.downloadTorrent(movieName, movieHash)
- *          .then(function(stream_path){
- *              // stream started, open stream_path to watch the movie!
+ *   torrents.downloadTorrent( torrent_file_or_magnet )
+ *          .then(function( torrent_stream_uri ){
+ *
+ *              // stream started, open torrent_stream_uri to watch the movie!
  *
  *          }, function(error){
+ *
  *              // Critical Error while downloading the torrent
  *
- *          }, function(progress){
- *              // Progress of the download
+ *          }).done();
  *
- *          }).
- * } ).catch(function(error){
- *      console.log("opts, cant read torrent xxx")
+ *  torrents.on('discovered-files',function( tor_files ){
+ *      // If i want to download all files!
+ *      tor_files.forEach( function(file,i){
+ *          console.log(file)
+ *          file.select()
+ *      } );
+ *  });
+ *
  * });
  */
 
 var Torrents = function(options){
     events.EventEmitter.call(this);
-    var self = this;
-    self.config = options;
-    this.init();
+    this.init(options);
 }
 util.inherits( Torrents, events.EventEmitter )
 
-Torrents.prototype.init = function(){
+Torrents.prototype.init = function(options){
     var self = this;
+    self.config = options;
     self.loading = false;
 }
 
@@ -54,39 +55,7 @@ Torrents.prototype.cleanCache = function(cb){
 }
 
 
-
-Torrents.prototype.processTorrent = function( torrent_file ){
-
-    var defer = Q.defer();
-    var self = this;
-
-    // Read torrent file/magnet
-    readTorrent( torrent_file, function(err, torrent_data) {
-        if (err) {
-            console.error("Error reading torrent ", torrent_data, err.message);
-            defered.reject(new Error(("Error reading torrent...", torrent_data, err.message)))
-        }
-
-        console.info("Torrent DATA: ", torrent_data.files)
-
-        if(JSON.stringify(torrent_data.files).toLowerCase().indexOf('mkv')>-1){
-            self.emit('alert','Sorry, but MKV files doesnt play on airPlay.')
-            movieName = torrent_data.name
-            movieHash = torrent_data.infoHash
-        } else {
-            movieName = torrent_data.name
-            movieHash = torrent_data.infoHash
-        }
-
-        defer.resolve( movieHash, movieName, torrent_data )
-    });
-
-    return defer.promise;
-}
-
-
-
-Torrents.downloadTorrent = function( torrent_file ){
+Torrents.prototype.downloadTorrent = function( torrent_file ){
 
     var self = this;
     var defer = Q.defer()
@@ -117,50 +86,55 @@ Torrents.downloadTorrent = function( torrent_file ){
         Settings.address = href;
 
         // Updating is based on setInterval
-        defered.resolve(href)
+        defer.resolve(href)
     });
 
 
     engine.server.once('error', function(e){
         console.error("Error on torrent engine: ",e)
-        defered.reject(new Error(e))
+        defer.reject(new Error(e))
 
         // Restart on perrlix error?
         //engine.server.listen(0, address())
     })
 
     engine.on('verify', function() {
-        verified++;
+        self.verified++;
         engine.swarm.piecesGot += 1;
     });
 
     engine.on('invalid-piece', function() {
         //console.log('invalidpiece')
-        invalid++;
+        self.invalid++;
     });
 
     engine.on('hotswap', function() {
-        hotswaps++;
+        self.hotswaps++;
     });
     engine.on('uninterested', function(){
-        if(engine) engine.swarp.pause();
+        if(engine) self.engine.swarm.pause();
     })
     engine.on('insterested', function(){
-        if(engine) engine.swarm.resume();
+        if(engine) self.engine.swarm.resume();
     })
 
     self.swarm.on('wire', function(){
-        // Swarp started
+        // Swarm started
     });
 
+    self.update_timer = setTimeout( function(){
+        defer.notify( self );
+    }, 1000.0/Settings.TORRENT_WATCHING_TIMER )
 
+
+    /*
+     *
+     */
     var onready = function() {
-        defer.resolve(engine.files)
+        self.emit('discovered-files', engine.files)
     };
     if(engine.torrent) onReady;
     engine.on('ready', onready);
-
-
 
     return defer.promise;
 }

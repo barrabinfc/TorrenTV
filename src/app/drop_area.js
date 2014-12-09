@@ -2,24 +2,21 @@ var address = require('network-address');
 var qs      = require('querystring');
 var Q       = require('q');
 var util    = require('util');
+var path    = require('path');
 
 var events = require('events');
 
 isMagnet = function(link){
-    console.log('isMagnet', link)
     return (link.toLowerCase().substring( 0, 6) === 'magnet')
 }
 
 isTorrent = function(link){
-    console.log('isTorrent', link)
     return (link.toLowerCase().substring(link.length-7,link.length) === 'torrent');
 }
 
 
 enabled_mimetypes = ['mp4','m4v','mov','jpg','mkv','avi','m4a','flac','srt','vtt','mp3']
 isAudioVideoFile = function(link){
-
-    console.log('isAudioVideoFile', link)
 
     mimetype_match = false;
     for(var c_myme in enabled_mimetypes){
@@ -32,7 +29,6 @@ isAudioVideoFile = function(link){
 }
 
 isHttpResource = function(link){
-    console.log('isHttpResource', link)
     return (link.toLowerCase().substring(0,5) === 'http')
 }
 
@@ -46,16 +42,15 @@ isHttpResource = function(link){
 
 var DropArea = function(options){
     events.EventEmitter.call(this);
-    var self = this;
-    self.el = options.el;
-    self.config = options;
-    this.init();
+    this.init(options);
 }
 util.inherits( DropArea, events.EventEmitter )
 
-DropArea.prototype.init = function(){
+DropArea.prototype.init = function(options){
     var self = this;
 
+    self.el = options.el;
+    self.config = options;
     self.current_file = undefined;
     self.file_history = []
 
@@ -98,17 +93,14 @@ DropArea.prototype.init = function(){
 
 DropArea.prototype.playFile = function( file){
     var self = this;
-    console.log("play", file)
     self.emit('play', file )
 }
 
 DropArea.prototype.downloadFile = function(file){
     var self = this;
     if( isTorrent(file) || isMagnet(file)){
-        console.log("torrent-download", file)
         self.emit('torrent-download', file)
     } else if( isHttpResource(file) ){
-        console.log("http-download", file)
         self.emit('http-download', file)
     }
 }
@@ -121,11 +113,9 @@ DropArea.prototype.downloadFile = function(file){
  * Launch the appropriate downloaders via signals
  */
 DropArea.prototype.launchFile = function( file ){
-
     var self = this;
 
     // Is a torrent ?
-    console.log(file)
     if( isTorrent(file) || isMagnet(file)){
         self.downloadFile(file)
 

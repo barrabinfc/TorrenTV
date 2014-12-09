@@ -1,5 +1,8 @@
-var readTorrent = require( 'read-torrent' );
 var numeral = require('numeral');
+var events = require('events');
+var util = require('util');
+var _  = require('underscore');
+var fs = require('fs');
 
 //var subtitles_server = new (require("./subtitlesServer.js"))()
 var srt2vtt2 = require('srt2vtt2')
@@ -14,91 +17,321 @@ var menu = new gui.Menu();
 
 var utils = require('./utils');
 
-global.updater = null;
-global.torrent = null;
-global.drop_area = null;
 
 
-bootstrap = function(){
-    console.info("CWD: ",process.cwd())
-    console.info("PATH: ",execPath)
+/*
+ * TorrenTV app
+ *
+ *
+ */
 
-    if( Settings.DEBUG ){
-        win.showDevTools();
-    }
+var TorrenTV = function(options){
+    events.EventEmitter.call(this);
+    this.init(options);
+}
+util.inherits( TorrenTV, events.EventEmitter )
 
-    // Auto-updating
-    var updater = require('./auto-updater')
-    if( Settings.auto_update )
-        updater.autoUpdate()
-
-    var isMac = process.platform.indexOf('dar')>-1 || process.platform.indexOf('linux')>-1
-    if(!isMac)
-        win.resizeTo(320, 340)
-
-
-    // Torrent engine
-    var bittorrent = require('./torrents')
-    var torrent = new bittorrent.Engine();
-    global.torrent = torrent;
-
-    var DropArea = require('./drop_area').DropArea;
-    var drop_area = drop_area = new DropArea( {el: document.documentElement });
-    global.drop_area = drop_area;
-
-
-    console.assert(global.torrent   !== null);
-    console.assert(global.drop_area !== null);
-
-
-    // Drag/drop of files
-    drop_area.on('torrent-download', function(file){
-
-        torrent.processTorrent(file).then( function(movieName, movieHash, torrent ){
-
-            console.log(movieName, movieHash);
-            console.info(torrent);
-
-            /*
-            torrent.downloadTorrent( torrent  )
-            }
-            */
-        });
-    }).on('http-download', function(file){
-        console.log("Dropped http file: ", file)
-
-        //download(file);
-    }).on('play', function(file){
-        console.log("Dropped file: ", file)
-
-        // Ready to play!
-        console.log("Play in devices: ", file)
-    });
-
-};
-
-
-
-
-
-
-win.on('close', function() {
+TorrenTV.prototype.exit = function() {
     // remove torrents downloaded upon exit
     if (Settings.remove_downloads_on_exit){
-        if (global.torrent){
-            global.torrent.cleanCache(function(){
+        if (this.torrent){
+            this.torrent.cleanCache(function(){
                 gui.App.quit();
             });
         }
     } else {
         gui.app.Quit();
     }
-});
+};
 
-win.on('loaded', function(){
-    console.log("Loaded...");
-    bootstrap();
-})
+
+
+
+TorrenTV.prototype.init = function(options){
+    var self = this;
+
+    self.updater = null;
+    self.torrent = null;
+    self.drop_area = null;
+
+    self.services = [];
+    self.devices  = [];
+    self.default_device = null;
+
+    self.config = options;
+
+    console.info("CWD: ",process.cwd())
+    console.info("PATH: ",execPath)
+
+    if( Settings.DEBUG ){
+        //win.showDevTools();
+        
+        crash_path = gui.App.dataPath + '/crashes';
+        if(!fs.existsSync(crash_path))
+            fs.mkdirSync(crash_path)
+        gui.App.setCrashDumpDir( crash_path )
+    }
+
+    // Auto-updating
+    self.updater = require('./auto-updater')
+    if( Settings.auto_update )
+        self.updater.autoUpdate()
+
+    var isMac = process.platform.indexOf('dar')>-1 || process.platform.indexOf('linux')>-1
+    if(!isMac){
+        win.resizeTo(320, 340)
+    }
+
+
+    // Torrent engine
+    var bittorrent = require('./torrents')
+    self.torrent = new bittorrent.Engine();
+    global.torrent = self.torrent;
+
+
+    // Start droparea
+    var DropArea = require('./drop_area').DropArea;
+    self.drop_area = new DropArea( {el: document.documentElement });
+    global.drop_area = self.drop_area;
+
+    console.assert(global.torrent   !== null, "Torrent Engine should be created but failed");
+    console.assert(global.drop_area !== null, "Drop Area failed to create");
+
+    // Once dropped a TORRENT FIle
+    self.drop_area.on('torrent-download', self.playTorrent.bind(self) )
+                .on('http-download',      self.playHttp.bind(self) )
+                .on('localfile',          self.playFile.bind(self) )
+
+
+    // Start services/device discovery 
+    self.setup_services()
+    self.startDeviceScan()
+
+
+    // Play content on device players
+    self.on('play',             self.play.bind(self))
+    self.on('playAllDevices',   function(stream_uri) {
+      _(self.devices).forEach(  function(device) {
+        self.play.bind(stream_uri, device)
+      });
+    });
+
+
+    self.on('deviceOn',  function(device, dev_name){
+        self.updateDevicesOnScreen(device);
+    });
+    self.on('deviceOff', function(device, dev_name) {
+        self.deviceOff(device, dev_name)
+        self.updateDevicesOnScreen(device)
+    });
+};
+
+
+
+
+
+/*
+ *
+ * Handling download of different filetypes
+ *
+ */
+
+TorrenTV.prototype.playTorrent = function(torrent_file){
+    var self = this;
+
+    // Download torrent
+    self.torrent.downloadTorrent(torrent_file).then( function( video_stream_uri ){
+
+        console.log("Yepaaa, ready to play at ", video_stream_uri);
+        try {
+            self.emit('play', video_stream_uri );
+        }catch(err){
+            console.error("Oops, some error while playing!",err);
+        }
+
+    }).progress(self.torrentProgress)
+      .catch(function(err){
+        console.error("Oops, some error occured while downloading torrent!", err);
+    }).done()
+
+    //  Select every file to download
+    self.torrent.on('discovered-files',function(tor_files){
+        console.trace()
+        tor_files.forEach( function(file,i,files){
+            console.info( file.name );
+            file.select()
+        });
+    });
+}
+
+TorrenTV.prototype.playHttp = function(http_file){
+    var self = this;
+    self.emit('play', http_file)
+}
+
+TorrenTV.prototype.playFile = function(local_file){
+    var self = this;
+    self.emit('play', local_file)
+}
+
+
+TorrenTV.prototype.play = function( video_stream_uri, device ){
+    var self = this;
+
+    var dev = (device  !== undefined ? device : self.default_device );
+
+    try {
+        dev.play(video_stream_uri);
+    } catch(err){
+        console.error("error playing ", video_stream_uri, " to device ", dev);
+        console.error(err);
+    }
+}
+
+
+/*
+ * Torrent Progress handler
+ */
+TorrenTV.prototype.torrentProgress = function( torrent ){
+    var self = this;
+}
+
+TorrenTV.prototype.updateDevicesOnScreen = function(device, dev_name){
+    // A new wild device appeared
+}
+
+
+
+
+
+/*
+ *
+ * Device detection (airplay/chromecast/vlc/etc)
+ */
+TorrenTV.prototype.setup_services = function(){
+    var self = this;
+
+    console.assert(self.services !== [], "Services is not empty! No need to setup it again")
+
+    var _services = { 'roku':       require('./devices/roku').Device,
+                      'vlc':        require('./devices/vlc').Device,
+                      'xbmc':       require('airplay-xbmc').createBrowser,
+                      'chromecast': require('chromecast-js').Browser,
+                      'airplay':    require('airplay-js').createBrowser,
+                     }
+
+    try {
+        _(_services).keys().forEach(function(serv_name){
+                service  = _services[serv_name];
+                settings = Settings.devices[ serv_name ]
+
+                if(!settings.enabled)
+                    return;
+
+                try {
+                    /*
+                    * Create a new service, and attach deviceOn to deviceDetected.
+                    * We force a closure to pass also serv_name
+                    */
+                    var service_instance = new service(settings);
+                    var serv_name        = serv_name;
+
+                    service_instance.on('deviceOn', function(device){
+                        self.detectedDevice(device, serv_name )
+                    }.bind(self) );
+                    service_instance.on('deviceOff', function(device){
+                        self.emit('deviceOff', device, serv_name )
+                    })
+                    self.services[serv_name] = service_instance;
+
+                    console.log("Created Service Discovery:", serv_name);
+                } catch (err){
+                    console.error("Couldnt setup Discovery Service:", serv_name, err);
+                }
+        });
+
+    }catch(err){
+        console.error("Couldnt setup Discovery Services (airplay/xbmc/etc)!", err);
+    }
+} 
+
+
+TorrenTV.prototype.startDeviceScan = function(){
+    var self = this;
+
+    
+    self.devices = []
+
+    for(var serv_name in self.services){
+        service = self.services[serv_name]
+
+        try {
+            service.start();
+        } catch(err){
+            continue;
+        }
+
+        // stop discovery after some time...
+        if(Settings.discovery_timeout > 0){
+            settimeout(function(){
+                service.stop();
+            }, Settings.discovery_timeout);
+        }
+    };
+}
+
+TorrenTV.prototype.stopDeviceScan = function(){
+    var self = this;
+    for(var serv_name in self.services){
+        service = self.services[serv_name]
+        service.stop();
+    }
+}
+
+
+TorrenTV.prototype.detectedDevice = function(device, server_name){
+    var self =  this;
+
+    var device_uri = ((device.info.length > 0 ? device.info[0] : '') + ':' + 
+                      (device.name !== undefined ? device.name : server_name));
+
+    // put only new devices (info+name) on the device list.
+    if(! _.has(self.devices, device_uri )){
+        console.log("newDevice: ", device_uri);
+        self.devices[device_uri] = device
+
+        if(Settings.devices.default == server_name)
+            self.default_device = device;
+    }
+
+    // for gui
+    self.emit('deviceOn', device, device_uri);
+}
+
+TorrenTV.prototype.deviceOff = function(device, server_name){
+    var self = this;
+
+    // put only new devices (info+name) on the device list.
+    var device_uri = ((device.info.length > 0 ? device.info[0] : '') + ':' + 
+                      (device.name !== undefined ? device.name : server_name));
+
+    if(! _.has(self.devices, device_uri )){
+        console.log("newDevice: ", device_uri);
+        delete self.devices[device_uri] 
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -298,115 +531,24 @@ function addChromecastDeviceElement(label){
 
 */
 
+/*var Exception = require('exception');
+process.once('uncaughtException', function derp(err) {
+  var exception = new Exception(err);
+  console.log( exception.toJSON());
+  exception.save();
+});
+*/
 
+global.document = window.document;
+global.navigator = window.navigator;
+win.on('loaded', function(){
+    global.app  = new TorrenTV();
+    win.on('close', global.app.exit );
 
-/*
- *
- * Start device detection (airplay/chromecast/vlc/etc)
- */
-global.services = [];
-global.devices  = [];
-
-setup_services = function(){
-
-    if( Settings.devices.roku.enabled ){
-        roku = require('./devices/roku');
-        roku_dev =  new roku.Device(Settings.devices.roku);
-        roku.on('deviceOn', detectedNewDevice );
-    }
-
-    if( Settings.devices.chromecast.enabled ){
-        var CHROMECAST = require('chromecast-js');
-
-        chromecaster_dev = new CHROMECAST.Browser()
-        chromecaster_dev.on('deviceOn', detectedDevice );
-    }
-
-    if( Settings.devices.airplay.enabled ){
-        var AIRPlay = require( 'airplay-js' );
-
-        airplay_dev = new AIRPlay.Browser()
-        airplay_dev.on( 'deviceOnline', detectedDevice );
-
-        /*
-        if(ips.indexOf(device.info[0])<0){
-            ips.push(device.info[0])
-            var name = device.name.substring(0,7)+ (device.name.length > 7 ? "..." : "")
-            //var name = device.name
-            addDeviceElement('airplay',name)
-            device.active = true
-            console.log("Device found!", device)
-            device.playing = true
-            self.devices.push(device)
-            //console.log('tryToPlay')
-            win.emit('wantToPlay');
-        }
-        });
-        */
-    }
-
-    if( Settings.devices.xmbc.enabled ){
-        var XMBC    = require( 'airplay-xbmc' );
-        xmbc_dev    = new XMBC.Browser()
-        xmbc_dev.on( 'deviceOn', detectedDevice ); 
-        
-        /*
-        function( device ) {
-        if(ips.indexOf(device.info[0])<0){
-            ips.push(device.info[0])
-            console.log(ips)
-            var name = device.name.substring(0,7)+ (device.name.length > 7 ? "..." : "")
-            addDeviceElement('xmbc',name)
-
-            device.active = true
-            console.log("XBMC found!", device)
-            self.devices.push(device)
-            //console.log('tryToPlay')
-            win.emit('wantToPlay');
-        }
-        });
-        */
-        //xmbc_dev.start();
-    }
-
-
-    if (Settings.devices.vlc.enabled ){
-        var VLC = require('./devices/vlc')
-
-        vlc_dev = new VLC.Device({addresses: 'localhost','name': 'VLC'});
-        vlc_dev.on('deviceOn', detectedDevice );
-    }
-}
-
-function start_device_scan(){
-    services.each( function(service){
-        service.start();
-
-        // Stop discovery after some time...
-        if(settings.DISCOVERY_TIMEOUT > 0){
-            setTimeout(function(){
-                service.stop();
-            }, Settings.DISCOVERY_TIMEOUT);
-        }
+    var ComboKey = require('combokeys');
+    var mouseTrap = new ComboKey(document);
+    global.mouseTrap = mouseTrap;
+    global.mouseTrap.bind('f12', function() {
+        win.showDevTools();
     });
-}
-
-function stop_device_can(){
-    services.each( function(service){
-        service.stop();
-    });
-}
-
-
-detectedDevice = function(device){
-    console.log("detectedDevice: ", device);
-
-    // Put only new devices (info+name) on the device list.
-    device_uri = ((device.info.length > 0 ? device.info[0] : '') + ':' + device.name);
-    console.log("detectedDevice: ", device_uri);
-    if(! device_uri in global.devices)
-        devices.push(device)
-
-    // Display on the gui ?
-    // ...
-}
+})

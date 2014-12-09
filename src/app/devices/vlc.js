@@ -55,8 +55,9 @@ launchTest = function(args){
                         home + app_path + VLC_TEST_ARGS ,
                     {timeout: 100});
 
-    child.on('exit',function(code,signal){
-        if(code !== 0) defered.reject(new Error(("Vlc is not installed...")))
+    child.on('close',function(code,signal){
+        if(code !== 0 || signal !== null) 
+            defered.reject(new Error(("Vlc is not installed...",signal)))
         else defered.resolve(true)
     });
 
@@ -83,8 +84,6 @@ launchApp = function( args ) {
 
         var c_args = VLC_ARGS.split(' ').concat( args ).join(' ')
 
-        console.log('launchVlcApp', c_args)
-
         _launcher = ('vlc'              + ' ' + c_args +    ' || ' + 
                     home + app_path     + ' ' + c_args +    ' || ' + 
                     app_path            + ' ' + c_args  )
@@ -95,8 +94,8 @@ launchApp = function( args ) {
     vlc.stdout.on('data', function(data){
         defered.resolve(true)
     })
-    vlc.on('error', function(code){
-        if(code !== 0) defered.reject(new Error(("Vlc is not installed...")))
+    vlc.on('close', function(code,signal){
+        if(code !== 0) defered.reject(new Error(("Vlc could not be launched...")))
     });
 
     return defered.promise;
@@ -112,27 +111,34 @@ launchApp = function( args ) {
  */
 var VlcDevice = function(options){
     events.EventEmitter.call(this);
-    var self = this;
-    self.name   = 'VLC'
-    self.config = options;
-    this.init();
+    this.init(options);
 }
 util.inherits( VlcDevice, events.EventEmitter )
 
-VlcDevice.prototype.init = function(){
+VlcDevice.prototype.init = function(options){
     var self = this;
-
+    self.info = ['localhost',];
+    self.name   = 'vlc'
+    self.config = options;
     self.playing = false;
 }
 
+/*
+ * When 'started', check if VLC is installed
+ * emit 'deviceOn'  if installed
+ */
 VlcDevice.prototype.start =  function(){
     var self = this;
-    self.is_installed().then(
-        self.info = ['localhost',]
-        self.emit('deviceOn', self)
-    ).catch(function(error){
-        console.log("no VLC installed")
-    });
+    self.is_installed().then( function(is_installed) {
+        try {
+            self.emit('deviceOn', self);
+        } catch(err){
+            console.error('deviceOnError: ', self, err);
+            console.trace();
+        }
+    }).catch(function(error){
+        console.log("no VLC installed",error)
+    }).done();
 }
 
 VlcDevice.prototype.is_installed = function(){
@@ -140,23 +146,19 @@ VlcDevice.prototype.is_installed = function(){
 
     // Run with exit 0, to see if application is found.
     launchTest().then(function(is_installed){
-        Settings.devices.vlc.installed = is_installed;
+        //Settings.devices.vlc.installed = is_installed;
         defered.resolve( is_installed )
-    });
+    }).done();
 
     return defered.promise;
 }
 
-VlcDevice.prototype.is_enabled = function(){
-    var self = this;
 
-    return (Settings.devices.vlc.enabled === true  && 
-            Settings.devices.vlc.installed === true )
-};
 
 VlcDevice.prototype.play = function(resource, n, callback ){
     var self = this;
 
+    console.log("Called play of VLC", resource)
     if(n)
         options['currentTime'] = n
 
@@ -168,6 +170,5 @@ VlcDevice.prototype.play = function(resource, n, callback ){
 
     }).done(callback);
 }
-
 
 exports.Device = VlcDevice

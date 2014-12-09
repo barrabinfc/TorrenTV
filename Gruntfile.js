@@ -63,7 +63,7 @@ module.exports = function(grunt) {
 				build_dir: './build', // Where the build version of my node-webkit app is saved
 				keep_nw: true,
 				embed_nw: false,
-				mac_icns: './src/app/images/nw.icns', // Path to the Mac icon file
+				mac_icns: './src/app/images/icons/nw.icns', // Path to the Mac icon file
 				zip: false, // Zip nw for mac in windows. Prevent path too long if build all is used.
 				mac: buildPlatforms.mac,
 				win: buildPlatforms.win,

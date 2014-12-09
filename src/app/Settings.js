@@ -13,6 +13,9 @@ Settings.DEBUG   = true;
 Settings.DISCOVERY_TIMEOUT = 7000;
 Settings.DISCOVERY_STATUS  = 'running';
 
+// 10fps torrent stats 
+Settings.TORRENT_WATCHING_TIMER = 10; 
+
 Settings.auto_update = true;
 Settings.remove_downloads_on_exit = true;
 
@@ -23,18 +26,19 @@ Settings.devices = {
         port:    9009,
         xml:     'index.xml'
     },
+    vlc: {
+        enabled: true,
+        addresses: 'localhost'
+    },
+    xbmc: {
+        enabled: true
+    },
     chromecast: {
         enabled: true,
         port:    9900,
         address: "http://localhost:9900"
     },
-    xmbc: {
-        enabled: true
-    },
     airplay: {
-        enabled: true
-    },
-    vlc: {
         enabled: true
     }
 };
