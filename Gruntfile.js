@@ -27,6 +27,7 @@ module.exports = function(grunt) {
 	var currentVersion = grunt.file.readJSON('package.json').version;
 
 	require('load-grunt-tasks')(grunt);
+	grunt.loadNpmTasks('grunt-jsvalidate');
 
 	grunt.registerTask('build', [
 		'nodewebkit'
@@ -108,7 +109,19 @@ module.exports = function(grunt) {
 				options: {
 					jshintrc: 'src/app/.jshintrc'
 				},
-				src: ['src/app/*.js']
+				src: ['src/app/*.js','src/app/**/*.js']
+			}
+		},
+
+		jsvalidate: {
+			options: {
+				globals: {},
+				verbose: false
+			},
+			targetName: {
+				files: {
+					src: ['src/app/*.js',]
+				}
 			}
 		},
 

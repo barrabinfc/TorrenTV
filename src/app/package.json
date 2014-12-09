@@ -35,7 +35,7 @@
     "resizable": false,
     "show": true,
     "fullscreen": false,
-    "toolbar": false,
+    "toolbar": true,
     "width": 300,
     "always-on-top": true,
     "height": 300

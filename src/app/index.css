@@ -23,10 +23,6 @@ body{
     background-color: white;
     height: 275px;
 }
-body div{
-
-    color: grey;
-}
 
 .center{
     text-align:center;
@@ -62,7 +58,7 @@ body div{
 }
 
 #droparea{
-    height: 100px;
+    height: auto;
 }
 
 #droplogo{
@@ -73,7 +69,7 @@ body div{
     margin: 0 auto;
     margin-top: 17px;
     /*margin-bottom: 30px;*/
-    border: 3px dashed rgba(1,1,1,0.15);   
+    border: 3px dashed rgba(1,1,1,0.15);
     background-color: #f5f5f5;
 }
 
@@ -129,82 +125,27 @@ body div{
    visibility: hidden;
 }
 
-.deviceicon {
-   content:url("./AirplaySmall.png");
-}
-
-.chromeicon {
-   content:url("./ChromecastSmall.png");
-}
-
-.playbutton {
-    content:url("./play.png");
-    cursor:pointer;
-}
-
-.forwardbutton {
-    content:url("./forward.png");
-    cursor:pointer;
-}
-
-
-.rewindbutton {
-    content:url("./rewind.png");
-    cursor:pointer;
-}
 
 
 
-.stopbutton {
-    margin-top: -20px;
-   content:url("./stop.png");
-    cursor:pointer;
-}
 
-.pausebutton {
-    margin-top: -20px;
-   content:url("./pause.png");
-    margin-right:9px;
-    cursor:pointer;
-}
 
-.deviceiconOff {
-    
-    content:url("./AirplaySmallOff.png");
-}
-
-.ChromedeviceiconOff {
-    
-    content:url("./ChromecastSmallOff.png");
-}
-
-.controlbutton {
-    display: inline-block;
-}
-
-#airplay{
+/*
+ *  Devices icons
+ */
+#player-container {
     margin:auto;
     width: 200px;
     height: 100px
     z-index: 3;
 }
 
-#topimages {
-    background: url(logostop.png) no-repeat;
-    margin-top: 25px;
-    margin-bottom: -25px;
-    height: 100px;
-    margin-left: 20px;
-}
-
-
-#airplay img{
-
+#player-container img {
     clear: both;
-    width:auto; 
+    width:auto;
     max-height:100%;
-    background-image: url(AirplayIcon.png);
 }
+
 .device {
     font-size: 0.5em;
     z-index:-1;
@@ -212,10 +153,108 @@ body div{
     display: inline-block;
 }
 
+
+.device-icon {
+   content:url("./images/AirplaySmall.png");
+}
+
+.device-icon-off {
+    content:url("./images/AirplaySmallOff.png");
+}
+
+
+.airplay-icon {
+   content:url("./images/AirplaySmall.png");
+}
+
+.airplay-icon-off {
+    content:url("./images/AirplaySmallOff.png");
+}
+
+.chrome-icon {
+   content:url("./images/ChromecastSmall.png");
+}
+
+.chrome-icon-off {
+   content:url("./images/ChromecastSmallOff.png");
+}
+
+.vlc-icon {
+   content:url("./images/external-vlc-icon.png");
+}
+
+.vlc-icon-off {
+    content:url("./images/AirplaySmallOff.png");
+}
+
+.playbutton {
+    content:url("./images/play.png");
+    cursor:pointer;
+}
+
+.forwardbutton {
+    content:url("./images/forward.png");
+    cursor:pointer;
+}
+
+
+.rewindbutton {
+    content:url("./images/rewind.png");
+    cursor:pointer;
+}
+
+
+
+.stopbutton {
+    margin-top: -20px;
+   content:url("./images/stop.png");
+    cursor:pointer;
+}
+
+.pausebutton {
+    margin-top: -20px;
+   content:url("./images/pause.png");
+    margin-right:9px;
+    cursor:pointer;
+}
+
+.controlbutton {
+    display: inline-block;
+}
+
+#player-container {
+    margin:auto;
+    width: 200px;
+    height: 100px
+    z-index: 3;
+}
+
+#player-container img {
+    clear: both;
+    width:auto;
+    max-height:100%;
+}
+
+.device {
+    font-size: 0.5em;
+    z-index:-1;
+    cursor:pointer;
+    display: inline-block;
+}
+
+#topimages {
+    background: url(./images/logostop.png) no-repeat;
+    margin-top: 25px;
+    margin-bottom: -25px;
+    height: 100px;
+    margin-left: 20px;
+}
+
+
 .processing-icon {
     content:"Hola";
     margin:auto;
-    background-image: url(loading.gif);
+    background-image: url(./images/loading.gif);
     width:32px;
     height:32px;
 }
@@ -226,11 +265,6 @@ body div{
 .hidden {
     visibility: hidden;
 }
-
-#airplay-container {
-    height:100px;
-}
-
 
 #processing {
     height: 32px;
