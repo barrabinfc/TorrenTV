@@ -15,7 +15,11 @@ var gui = require('nw.gui');
 var win = gui.Window.get();
 var menu = new gui.Menu();
 
-var utils = require('./utils');
+global.document = window.document;
+global.navigator = window.navigator;
+global.$ = $;
+
+var n_utils = require('./utils');
 
 
 
@@ -63,10 +67,11 @@ TorrenTV.prototype.init = function(options){
     console.info("CWD: ",process.cwd())
     console.info("PATH: ",execPath)
 
+
     if( Settings.DEBUG ){
         //win.showDevTools();
-        
-        crash_path = gui.App.dataPath + '/crashes';
+
+        crash_path = gui.App.dataPath + '/crashes/';
         if(!fs.existsSync(crash_path))
             fs.mkdirSync(crash_path)
         gui.App.setCrashDumpDir( crash_path )
@@ -78,9 +83,9 @@ TorrenTV.prototype.init = function(options){
         self.updater.autoUpdate()
 
     var isMac = process.platform.indexOf('dar')>-1 || process.platform.indexOf('linux')>-1
-    if(!isMac){
-        win.resizeTo(320, 340)
-    }
+    // Clean default behaviour of drag/drop
+    $(document).on('dragover', function(e){ e.preventDefault(); return false; } );
+    $(document).on('drop',     function(e){ e.preventDefault(); return false; } );
 
 
     // Torrent engine
@@ -91,7 +96,7 @@ TorrenTV.prototype.init = function(options){
 
     // Start droparea
     var DropArea = require('./drop_area').DropArea;
-    self.drop_area = new DropArea( {el: document.documentElement });
+    self.drop_area = new DropArea( {el: $(document)});
     global.drop_area = self.drop_area;
 
     console.assert(global.torrent   !== null, "Torrent Engine should be created but failed");
@@ -124,6 +129,8 @@ TorrenTV.prototype.init = function(options){
         self.deviceOff(device, dev_name)
         self.updateDevicesOnScreen(device)
     });
+
+    win.focus();
 };
 
 
@@ -178,9 +185,11 @@ TorrenTV.prototype.play = function( video_stream_uri, device ){
     var self = this;
 
     var dev = (device  != undefined ? device : self.default_device );
+    console.assert(dev !== null, "Issued a play, but no device detected/default device")
 
     try {
         dev.play(video_stream_uri);
+        dropArea.reset();
     } catch(err){
         console.error("error playing ", video_stream_uri, " to device ", dev);
         console.error(err);
@@ -291,8 +300,8 @@ TorrenTV.prototype.stopDeviceScan = function(){
 TorrenTV.prototype.detectedDevice = function(device, server_name){
     var self =  this;
 
-    var device_uri = ((device.info.length > 0 ? device.info[0] : '') + ':' + 
-                      (device.name !== undefined ? device.name : server_name));
+    var device_uri = (  (device.name !== undefined ? device.name : server_name) + '://' +
+                        (device.info.length > 0 ? device.info[0] : '') );
 
     // put only new devices (info+name) on the device list.
     if(! _.has(self.devices, device_uri )){
@@ -311,8 +320,8 @@ TorrenTV.prototype.deviceOff = function(device, server_name){
     var self = this;
 
     // put only new devices (info+name) on the device list.
-    var device_uri = ((device.info.length > 0 ? device.info[0] : '') + ':' + 
-                      (device.name !== undefined ? device.name : server_name));
+    var device_uri = (  (device.name !== undefined ? device.name : server_name) + '://' +
+                        (device.info.length > 0 ? device.info[0] : '') );
 
     if(! _.has(self.devices, device_uri )){
         console.log("deviceOff: ", device_uri);
@@ -530,7 +539,10 @@ function addChromecastDeviceElement(label){
 
 */
 
-/*var Exception = require('exception');
+/*
+ * Better crash-dumps
+ *
+var Exception = require('exception');
 process.once('uncaughtException', function derp(err) {
   var exception = new Exception(err);
   console.log( exception.toJSON());
@@ -538,17 +550,23 @@ process.once('uncaughtException', function derp(err) {
 });
 */
 
-global.document = window.document;
-global.navigator = window.navigator;
 win.on('loaded', function(){
     global.app  = new TorrenTV();
     win.on('close', global.app.exit );
+    win.focus();
 
     var ComboKey = require('combokeys');
     var mouseTrap = new ComboKey(document);
     global.mouseTrap = mouseTrap;
+
     global.mouseTrap.bind('f12', function() {
         win.showDevTools();
+    });
+    mouseTrap.bind('command+v', function(){
+        console.log('cmd-v',gui);
+        var clipboard = gui.Clipboard.get();
+        text = clipboard.get('text')
+        console.log("PASTED: ", text);
     });
 })
 
@@ -556,5 +574,11 @@ win.on('loaded', function(){
 process.once("SIGTERM", function () {
     console.log("SIGTERM");
     console.trace()
-    process.exit(0);
+    process.exit(-1);
+});
+process.on('uncaughtException', function(err,e){
+    console.info('Caught excetion ' , err);
+    console.info(console.trace());
+    //process.exit(-1);
+    win.showDevTools();
 });

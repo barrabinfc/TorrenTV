@@ -53,11 +53,9 @@ launchTest = function(args){
     child = proc.exec( app_path  + VLC_TEST_ARGS + ' || ' +
                        'vlc'     + VLC_TEST_ARGS + ' ||' + 
                         home + app_path + VLC_TEST_ARGS ,
-                    {timeout: 100});
-
-    child.on('close',function(code,signal){
-        if(code != 0 || signal !== null) 
-            defered.reject(new Error(("Vlc is not installed...",signal)))
+                        {timeout: 100}, function(error,stdout,stderr){
+        if(error !== null)
+            defered.reject(new Error(("Vlc is not installed...",error)))
         else defered.resolve(true)
     });
 
@@ -90,13 +88,11 @@ launchApp = function( args ) {
         console.log('launchVlcApp: ', _launcher, c_args)
     }
 
-    var vlc = proc.exec( _launcher  );
-    vlc.stdout.on('data', function(data){
-        defered.resolve(true)
-    })
-    vlc.on('close', function(code,signal){
-        if(code !== 0) defered.reject(new Error(("Vlc could not be launched...")))
-    });
+    var vlc = proc.exec( _launcher  , function(error, stdout,stderr){
+        if(error !== null)
+            defered.reject(new Error(("Vlc could not be launched...",error)))
+        else defered.resolve(true)
+    } );
 
     return defered.promise;
 }

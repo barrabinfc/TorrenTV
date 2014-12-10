@@ -3,6 +3,8 @@ var qs      = require('querystring');
 var Q       = require('q');
 var util    = require('util');
 var path    = require('path');
+var _       = require('underscore');
+var n_utils = require('./utils');
 
 var events = require('events');
 
@@ -54,9 +56,47 @@ DropArea.prototype.init = function(options){
     self.current_file = undefined;
     self.file_history = []
 
-    var doc = self.el;
-    doc.ondragover = function () {  this.className = 'hover'; return false; };
-    doc.ondragend = function () {   this.className = ''; return false; };
+    var doc = $(self.el);
+    doc.on('dragover', _.throttle( function (e) {   
+        //e.preventDefault();
+        $('.dropArea').addClass('drag-hover'); 
+        //return false;
+    }, 100));
+    doc.on('dragend', function (e) {   
+        console.log("dragEnd")
+        $('.dropArea').removeClass('drag-hover'); 
+        //return false;
+    });
+
+    // Show file dialog  selection
+    $('.info-message').on('click', function(){
+        console.log("clicked on info-message");
+        if(self.current_file)
+            return false
+
+        n_utils.chooseFile( function(file) {
+
+            var new_file = file;
+            if(new_file !== null){
+                // Launch file
+                self.current_file = new_file;
+                self.launchFile(new_file)
+        
+            }
+        });
+
+        return false;
+    });
+    /*
+    doc.on('mouseover', _.bind(function(e){
+        $('.dropArea').addClass('drag-hover'); 
+    }, self ));
+
+    doc.on('mouseout', _.bind(function(e){
+        $('.dropArea').removeClass('drag-hover');
+    },self));
+    */
+
 
     /*
      * Ok!
@@ -65,7 +105,7 @@ DropArea.prototype.init = function(options){
      * Otherwise, if is a video file or a HTTP URL, emit signal 'play'
      *
      */
-    doc.ondrop = function (event) {
+    doc.on('drop', function (event) {
 
         event.preventDefault && event.preventDefault();
 
@@ -82,11 +122,12 @@ DropArea.prototype.init = function(options){
             new_file = resource_path;
         }
 
+        // Launch file
         self.current_file = new_file;
         self.launchFile(new_file)
 
         return false;
-    }
+    });
 
 }
 
@@ -98,6 +139,7 @@ DropArea.prototype.playFile = function( file){
 
 DropArea.prototype.downloadFile = function(file){
     var self = this;
+    $('.dropArea').addClass('downloading');
     if( isTorrent(file) || isMagnet(file)){
         self.emit('torrent-download', file)
     } else if( isHttpResource(file) ){
@@ -114,6 +156,8 @@ DropArea.prototype.downloadFile = function(file){
  */
 DropArea.prototype.launchFile = function( file ){
     var self = this;
+
+    $('.dropArea').removeClass('drag-hover');
 
     // Is a torrent ?
     if( isTorrent(file) || isMagnet(file)){
@@ -133,8 +177,20 @@ DropArea.prototype.launchFile = function( file ){
         self.playFile(file)
     
     } else {
-        console.error("Unknow fille", file)
+        console.error("Unknow file dropped: ", file );
     }
 };
+
+
+// After file is playing, you can clean DropArea
+// and call it again (waiting for file drops/clicks)
+DropArea.prototype.reset = function(){
+    var self = this;
+
+    self.current_file = undefined;
+    $('.dropArea').removeClass('hang-hover', removeClass('downloading'));
+
+    return;
+}
 
 exports.DropArea = DropArea;

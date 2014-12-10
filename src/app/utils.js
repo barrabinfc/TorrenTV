@@ -15,11 +15,8 @@ var download = function(url, dest, cb) {
 
 
 //Local File Streamming
-var showMessage = function(message){
-  document.getElementById('top-message').innerHTML = message
-}
-var secondaryMessage = function(message){
-  document.getElementById('info-message').innerHTML = message
+var info = function(message){
+  document.querySelector('#info-message').innerHTML = message;
 }
 
 var bytes = function(num) {
@@ -34,5 +31,21 @@ var cleanStatus = function(){
   document.getElementById('box-message').innerHTML = ""
 }
 
+function chooseFile(cb) {
+    var chooser = document.querySelector('#fileDialog');
+    chooser.addEventListener("change", function(evt) {
+        cb(this.value);
+    }, false);
+
+    chooser.click();
+}
+
+/*
+global.chooseFile = chooseFile;
 global.download = download;
 global.openInFinder = openInFinder;
+*/
+
+exports.chooseFile = chooseFile;
+exports.download   = download;
+exports.openInFinder = openInFinder;

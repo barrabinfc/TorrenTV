@@ -4,35 +4,30 @@
     <title>TorrenTV</title>
       <link rel="stylesheet" href="index.css">
       <meta charset="utf-8">
-      <script src="mousetrap/mousetrap.js"></script>
+      <script src="./node_modules/zepto/zepto.min.js"></script>
       <script src="Settings.js"></script>
       <script src="app.js"></script>
   </head>
   <body>
-    <div id="container">
-        <div id="droparea" class="center">
-            <div id="droplogo">
-                <div id="dropmessage">
-                </div>
+    <div class="flipbook">
 
-                <div id="topimages" class="visible"></div>
+        <div class="dropArea">
+            <!-- <div class="logo"></div> -->
 
-                <div id="processing" class="hidden"></div>
+            <div class="torrent-status"></div>
+            <div class="processing-icon hidden"></div>
 
-                <div id="top-message">
-                    Drag and Drop
-                </div>
-                <div id="info-message">
-                    any Magnet, .Torrent or Video File.
-                </div>
-            </div>
+            <a href="#" class="info-message">
+                <p>Drag and Drop</p>
+                <p class="sub-message">any Magnet, .Torrent or Video File.</p>
+            </a>
+
         </div>
 
-        <div id="player-container" class="center">
+        <div class="deviceDiscovery">
         </div>
 
-        <div id="magnet" class="">
-        </div>
+        <input style="display:none;" id="fileDialog" type="file" />
     </div>
   </body>
 </html>

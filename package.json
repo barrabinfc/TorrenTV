@@ -42,13 +42,15 @@
     "simple-cors-file-server": "*",
     "srt2vtt2": "0.0.2",
     "underscore": "^1.7.0",
-    "windows-no-runnable": "~0.0.6"
+    "windows-no-runnable": "~0.0.6",
+    "zepto": "0.0.4"
   },
   "window": {
     "title": "TorrenTV",
     "icon": "src/app/images/icons/icon.png",
-    "frame": true,
+    "frame": false,
     "resizable": true,
+    "transparent": true,
     "show": true,
     "fullscreen": false,
     "toolbar": false,
