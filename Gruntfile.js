@@ -63,13 +63,12 @@ module.exports = function(grunt) {
 				build_dir: './build', // Where the build version of my node-webkit app is saved
 				keep_nw: true,
 				embed_nw: true,
-				mac_icns: './src/app/images/icons/nw.icns', // Path to the Mac icon file
 				zip: false, // Zip nw for mac in windows. Prevent path too long if build all is used.
+				mac_icns: './src/app/images/icons/nw.icns', // Path to the Mac icon file
 				mac: buildPlatforms.mac,
 				win: buildPlatforms.win,
 				linux32: buildPlatforms.linux32,
 				linux64: buildPlatforms.linux64,
-                download_url: 'http://dl.node-webkit.org/'
 			},
 			src: ['./src/**', '!./src/app/styl/**',
 				'./node_modules/**', '!./node_modules/bower/**', '!./node_modules/*grunt*/**', '!./node_modules/stylus/**',
@@ -84,12 +83,6 @@ module.exports = function(grunt) {
 			mac: {
 				cmd: 'build/cache/mac/<%= nodewebkit.options.version %>/node-webkit-v<%=nodewebkit.options.version%>-osx-ia32/node-webkit.app/Contents/MacOS/node-webkit  .'
 			},
-            mac32: {
-				cmd: 'build/cache/mac/<%= nodewebkit.options.version %>/node-webkit-v<%=nodewebkit.options.version%>-osx-ia32/node-webkit.app/Contents/MacOS/node-webkit  .'
-            },
-            mac64: {
-				cmd: 'build/cache/mac/<%= nodewebkit.options.version %>/node-webkit-v<%=nodewebkit.options.version%>-osx-x64/node-webkit.app/Contents/MacOS/node-webkit .'
-            },
 			linux32: {
 				cmd: '"build/cache/linux32/<%= nodewebkit.options.version %>/nw" .'
 			},

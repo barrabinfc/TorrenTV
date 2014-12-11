@@ -48,6 +48,7 @@ Torrents.prototype.init = function(options){
     self.config = options;
     self.loading = false;
     self.engine = null;
+
 }
 
 Torrents.prototype.cleanCache = function(cb){
@@ -61,8 +62,7 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
     var self = this;
     var defer = Q.defer()
 
-    console.info(self.engine);
-    console.assert(self.engine != null, "A torrent is already downloadiiiing, bitch!");
+    console.assert(self.engine == null, "A torrent is already downloadiiiing, bitch!");
 
     var engine = peerflix(torrent_file, {})
     self.engine = engine;
@@ -80,6 +80,7 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
         return !wire.peerChoking;
     };
 
+    // peerflix started serving the File!
     engine.server.on('listening', function() {
         var href = 'http://'+ address() + ':' + engine.server.address().port + '/';
         var filename = engine.server.index.name.split('/').pop().replace(/\{|\}/g, '');
@@ -96,6 +97,7 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
 
 
     engine.server.once('error', function(e){
+        self.loading = false;
         console.error("Error on torrent engine: ",e)
         defer.reject(new Error(e))
 
@@ -116,14 +118,6 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
     engine.on('hotswap', function() {
         self.hotswaps++;
     });
-    engine.on('uninterested', function(){
-        clearTimeout(self.update_timer);
-        if(engine) self.engine.swarm.pause();
-    })
-    engine.on('interested', function(){
-        if(engine) self.engine.swarm.resume();
-    })
-
     self.swarm.on('wire', function(){
         // Swarm started
     });

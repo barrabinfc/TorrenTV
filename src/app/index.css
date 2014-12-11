@@ -1,12 +1,12 @@
 @font-face {
   font-family: 'Open Sans';
-  src: url("fonts/OpenSans-Regular-webfont.woff");
+  src: url("media/fonts/OpenSans-Regular-webfont.woff");
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'Open Sans Bold';
-  src: url("fonts/OpenSans-Bold-webfont.woff");
+  src: url("media/fonts/OpenSans-Bold-webfont.woff");
   font-weight: normal;
   font-style: normal;
 }
@@ -30,7 +30,6 @@ body{
     -webkit-app-region: drag;
     -webkit-user-select: none;
 
-
     /* How pronounced should the 3D effects be */
     perspective: 800px;
     -webkit-perspective: 800px;
@@ -49,31 +48,25 @@ a:hover {
     transform: scale(1.05);
 }
 
-.center{
-    text-align:center;
-}
-
-.error {
-    color: red;
-}
-
-.disabled {
-    background-color: #777;
-}
-
 .enabled {
     background: #ff5c00 url(alert-overlay.png) repeat-x;
     cursor: pointer;
 }
-.cursored {
-    cursor: pointer;
-    color: blue;
-    text-decoration:underline;
-  }
 
 .hidden, .offlabel {
    visibility: hidden;
 }
+
+
+.animate-4x, .animate-2x, .animate , .animate-2h, .animate-4h {
+    transition-duration: 0.7s;
+    transition-timing-function: ease;
+    transition-property: all;
+}
+.animate-4h { transition-duration: 0.17s; }
+.animate-2h { transition-duration: 0.35s; }
+.animate-2x { transition-duration: 1.4s; }
+.animate-4x { transition-duration: 2.8s; }
 
 
 
@@ -104,9 +97,7 @@ a:hover {
 
     font-weight: bold;
     font-family: 'Open Sans Bold';
-
-    /* Animate the transitions */
-    transition: 0.25s ease;
+    -webkit-user-select: none;
 }
 
 .info-message > p {
@@ -119,6 +110,28 @@ a:hover {
 }
 
 
+/*
+ * General State of app
+ *
+ * dropCircle
+ *     (.drag-hover)
+ *       ->  (.torrent-prefetch)
+ *                  ->  show File Name / progress
+ *       -> (torrent:video_buffere)
+ *                           ->  select Device
+ *
+*             (at this moment the circle spin)
+ *
+ *  deviceCircle
+ *      (select device to Play)
+ *          -> device:play
+ *                          -> (device:played)
+ *                          -> (device:error)
+ *
+ *         <- dropCircle
+ *
+ *
+ */
 
 
 
@@ -163,35 +176,19 @@ a:hover {
     background-color: rgba(0,0,0,0.8 );
 
     /* Animate the transitions */
-    transition: 0.5s ease;
+    transition-timing-function: cubic-bezier(.29,1.44,.86,1.06);
 }
 
 .dropArea {
-    background: url(images/progress.gif) center/0% no-repeat,
-                url(images/bg_2.gif) center/120% no-repeat border-box;
+    background: url(media/images/progress.gif) center/0% no-repeat,
+                url(media/images/bg_2.gif) center/120% no-repeat border-box;
 
     -webkit-animation: dropAreaRotate 120s infinite;
 }
 
-.dropArea.downloading {
-    background: url(images/progress.gif) 7px 80px/230px 64px no-repeat,
-                url(images/bg_0.gif) center/120% no-repeat;
-
-    -webkit-animation: default;
-
-    -webkit-filter: saturate(1.5) grayscale(0);
-}
-
-.dropArea.downloading .info-message {
-    /*
-    transform: scale(2.5,2.5);
-    opacity: 0;
-    */
-}
-
 .dropArea.drag-hover {
-    background: url(images/progress.gif) center/% no-repeat,
-                url(images/bg_2.gif) center/120% no-repeat border-box;
+    background: url(media/images/progress.gif) center/% no-repeat,
+                url(media/images/bg_2.gif) center/120% no-repeat border-box;
     border: 10px double rgba(255, 255, 255, 0.75);
 
     -webkit-filter: grayscale(0) saturate(1.5);
@@ -205,13 +202,42 @@ a:hover {
     opacity: 0;
 }
 
+.dropArea.has-file {
+    background: url(media/images/progress.gif) center/% no-repeat,
+                url(media/images/bg_2.gif) center/120% no-repeat border-box;
+    border: 10px double rgba(255, 255, 255, 0.75);
+
+    -webkit-filter: grayscale(0) saturate(1.5);
+
+    /* Animate the transitions */
+    transition: 0.5s ease;
+}
+
+.dropArea.has-file .info-message {
+    transform: translateY(-100px);
+    opacity: 0;
+}
 
 
 
+
+.dropArea.has-file .loading {
+    visibility: visible;
+}
+
+.dropArea.has-file .torrent-status {
+    visibility: visible;
+}
+
+
+/* Green border when torrent downloading */
+.downloading .dropArea.has-file {
+    border-color: #00ff00;
+}
 
 
 .deviceDiscovery{
-    background: url(images/bg_4.gif) center;
+    background: url(media/images/bg_4.gif) center;
 
 	/* The back side is flipped 180 deg by default */
 	transform:rotateY(180deg);
@@ -234,7 +260,7 @@ a:hover {
 
 
 .logo {
-    /*background: url('./images/logostop.png') 0px 0px no-repeat;*/
+    /*background: url('./media/images/logostop.png') 0px 0px no-repeat;*/
     background-size: contain;
     width: 216px;
     height: 112px;
@@ -247,6 +273,19 @@ a:hover {
     position: absolute;
     margin-top: 25px;
     display: none;
+}
+
+.file-icon {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    color: white;
+    border-radius: 50%;
+    left: calc( 50% - 16px );
+    top: calc( 50% - 16px );
+    text-align: center;
+    line-height: 1.4;
+    background-color: rgba(42,42,42,0.75);
 }
 
 
@@ -278,64 +317,64 @@ a:hover {
 
 
 .device-icon {
-   content:url("./images/AirplaySmall.png");
+   content:url("./media/images/AirplaySmall.png");
 }
 
 .device-icon-off {
-    content:url("./images/AirplaySmallOff.png");
+    content:url("./media/images/AirplaySmallOff.png");
 }
 
 
 .airplay-icon {
-   content:url("./images/AirplaySmall.png");
+   content:url("./media/images/AirplaySmall.png");
 }
 
 .airplay-icon-off {
-    content:url("./images/AirplaySmallOff.png");
+    content:url("./media/images/AirplaySmallOff.png");
 }
 
 .chrome-icon {
-   content:url("./images/ChromecastSmall.png");
+   content:url("./media/images/ChromecastSmall.png");
 }
 
 .chrome-icon-off {
-   content:url("./images/ChromecastSmallOff.png");
+   content:url("./media/images/ChromecastSmallOff.png");
 }
 
 .vlc-icon {
-   content:url("./images/external-vlc-icon.png");
+   content:url("./media/images/external-vlc-icon.png");
 }
 
 .vlc-icon-off {
-    content:url("./images/AirplaySmallOff.png");
+    content:url("./media/images/AirplaySmallOff.png");
 }
 
 
 .playbutton {
-    content:url("./images/play.png");
+    content:url("./media/images/play.png");
     cursor:pointer;
 }
 
 .forwardbutton {
-    content:url("./images/forward.png");
+    content:url("./media/images/forward.png");
     cursor:pointer;
 }
 
 
 .rewindbutton {
-    content:url("./images/rewind.png");
+    content:url("./media/images/rewind.png");
     cursor:pointer;
 }
 
 .stopbutton {
     margin-top: -20px;
-   content:url("./images/stop.png");
+   content:url("./media/images/stop.png");
     cursor:pointer;
 }
 
 .pausebutton {
     margin-top: -20px;
-   content:url("./images/pause.png");
+   content:url("./media/images/pause.png");
     margin-right:9px;
     cursor:pointer;
 }
@@ -344,12 +383,49 @@ a:hover {
     display: inline-block;
 }
 
-.processing-icon {
-    content:"Hola";
+
+
+
+
+
+
+
+
+
+
+
+.loading {
     margin: 0px auto;
-    background-image: url(./images/loading.gif);
     position: absolute;
-    width:32px;
-    height:32px;
+    width: 100%;
+    height: 100%;
 }
 
+
+@-webkit-keyframes circleGrow {
+    from {
+        transform: scale(0.15);
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+.circleIcon {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,1.0);
+    position: absolute;
+
+    -webkit-animation: circleGrow 4s infinite;
+    -webkit-animation-timing-function: ease-out;
+}
+.loading .circleIcon:nth-child(1){
+    -webkit-animation-delay: 0s;
+}
+.loading .circleIcon:nth-child(2){
+    -webkit-animation-delay: 2s;
+}

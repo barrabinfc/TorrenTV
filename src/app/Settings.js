@@ -19,6 +19,10 @@ Settings.TORRENT_WATCHING_TIMER = 10;
 Settings.auto_update = true;
 Settings.remove_downloads_on_exit = true;
 
+Settings.animation = {
+    time: 10000
+};
+
 Settings.devices = {
     default: 'vlc',
     roku: {

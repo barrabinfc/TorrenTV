@@ -14,22 +14,9 @@ var download = function(url, dest, cb) {
 }
 
 
-//Local File Streamming
-var info = function(message){
-  document.querySelector('#info-message').innerHTML = message;
-}
-
 var bytes = function(num) {
   return numeral(num).format('0.0b');
 };
-
-var statusMessage = function(unchoked,wires,swarm){
-  document.getElementById('box-message').innerHTML = "Peers: "+unchoked.length+"/"+wires.length+"</br> Speed: "+bytes(swarm.downloadSpeed())+"/s</br>  Downloaded: "+bytes(swarm.downloaded)
-}
-
-var cleanStatus = function(){
-  document.getElementById('box-message').innerHTML = ""
-}
 
 function chooseFile(cb) {
     var chooser = document.querySelector('#fileDialog');
@@ -40,12 +27,35 @@ function chooseFile(cb) {
     chooser.click();
 }
 
-/*
-global.chooseFile = chooseFile;
-global.download = download;
-global.openInFinder = openInFinder;
-*/
+
+exports.isMagnet = function(link){
+    return (link.toLowerCase().substring( 0, 6) === 'magnet')
+}
+
+exports.isTorrent = function(link){
+    return (link.toLowerCase().substring(link.length-7,link.length) === 'torrent');
+}
+
+enabled_mimetypes = ['mp4','m4v','mov','jpg','mkv','avi','m4a','flac','srt','vtt','mp3']
+exports.isAudioVideoFile = function(link){
+
+    mimetype_match = false;
+    for(var c_myme in enabled_mimetypes){
+        if(link.toLowerCase().substring( link.length - c_myme.length , link.length ) === c_myme ){
+            mimetype_match = true
+            break;
+        }
+    }
+    return mimetype_match;
+}
+
+exports.isHttpResource = function(link){
+    return (link.toLowerCase().substring(0,5) === 'http')
+}
+
 
 exports.chooseFile = chooseFile;
 exports.download   = download;
 exports.openInFinder = openInFinder;
+
+

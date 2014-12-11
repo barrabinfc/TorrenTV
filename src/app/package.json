@@ -24,6 +24,7 @@
     "connect-cors": "^0.5.6",
     "decompress": "^2.0.0",
     "exception": "^1.0.6",
+    "font-awesome": "^4.2.0",
     "handlebars": "^2.0.0",
     "iconv-lite": "^0.4.5",
     "mousetrap": "^1.4.6",
@@ -36,11 +37,13 @@
     "read-torrent": "~1.0.0",
     "request": "^2.42.0",
     "rimraf": "^2.2.8",
+    "rivets": "^0.7.1",
     "semver": "^3.0.1",
     "senver": "0.0.0",
     "serve-static": "^1.3.2",
     "simple-cors-file-server": "*",
     "srt2vtt2": "0.0.2",
+    "state-machine": "0.0.3",
     "underscore": "^1.7.0",
     "windows-no-runnable": "~0.0.6",
     "zepto": "0.0.4"
@@ -51,20 +54,21 @@
     "frame": false,
     "resizable": true,
     "transparent": true,
-    "show": true,
+    "show": false,
     "fullscreen": false,
     "toolbar": false,
-    "width": 300,
     "always-on-top": false,
+    "show-in-taskbar": true,
+    "width": 300,
     "height": 300
   },
   "devDependencies": {
-    "grunt-contrib-clean": "^0.5.0",
-    "grunt-contrib-compress": "^0.10.0",
-    "grunt-exec": "^0.4.6",
-    "grunt-jsvalidate": "^0.2.2",
-    "grunt-node-webkit-builder": "^0.1.21",
-    "iconv-lite": "^0.4.5",
-    "load-grunt-tasks": "^0.6.0"
+    "grunt": "latest",
+    "grunt-contrib-clean": "latest",
+    "grunt-contrib-compress": "latest",
+    "grunt-exec": "latest",
+    "grunt-jsvalidate": "latest",
+    "grunt-node-webkit-builder": "latest",
+    "load-grunt-tasks": "latest"
   }
 }
