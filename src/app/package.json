@@ -59,7 +59,7 @@
     "toolbar": false,
     "always-on-top": false,
     "show-in-taskbar": true,
-    "width": 300,
+    "width": 350,
     "height": 300
   },
   "devDependencies": {

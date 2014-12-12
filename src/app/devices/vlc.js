@@ -51,7 +51,7 @@ launchTest = function(args){
     var home = (process.env.HOME || '') 
 
     child = proc.exec( app_path  + VLC_TEST_ARGS + ' || ' +
-                       'vlc'     + VLC_TEST_ARGS + ' ||' + 
+                       'vlc'     + VLC_TEST_ARGS + ' || ' + 
                         home + app_path + VLC_TEST_ARGS ,
                         {timeout: 100}, function(error,stdout,stderr){
         if(error !== null)
@@ -142,7 +142,6 @@ VlcDevice.prototype.is_installed = function(){
 
     // Run with exit 0, to see if application is found.
     launchTest().then(function(is_installed){
-        //Settings.devices.vlc.installed = is_installed;
         defered.resolve( is_installed )
     }).done();
 

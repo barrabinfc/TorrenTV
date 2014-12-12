@@ -19,9 +19,7 @@ Settings.TORRENT_WATCHING_TIMER = 10;
 Settings.auto_update = true;
 Settings.remove_downloads_on_exit = true;
 
-Settings.animation = {
-    time: 10000
-};
+Settings.device_discovery_on_startup = true;
 
 Settings.devices = {
     default: 'vlc',

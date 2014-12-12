@@ -51,14 +51,14 @@
     "title": "TorrenTV",
     "icon": "src/app/images/icons/icon.png",
     "frame": false,
-    "resizable": true,
+    "resizable": false,
     "transparent": true,
     "show": false,
     "fullscreen": false,
     "toolbar": false,
     "always-on-top": false,
     "show-in-taskbar": true,
-    "width": 300,
+    "width": 350,
     "height": 300
   },
   "devDependencies": {

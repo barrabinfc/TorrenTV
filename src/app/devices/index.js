@@ -28,8 +28,8 @@ PlayerDevices.prototype.init = function(options){
                         'airplay':    require('airplay-js').createBrowser  };
 
     // Active services and devices
-    self.services = []
-    self.devices = []
+    self.services = {}
+    self.devices = {}
 
     self.default_device = undefined;
 }
@@ -65,8 +65,8 @@ PlayerDevices.prototype.setup_services = function(){
                     var service_instance = new service(settings);
                     var serv_name        = serv_name;
 
-                    service_instance.on('deviceOn', self.detectedDevice.bind(self) );
-                    service_instance.on('deviceOff', self.deviceOff.bind(self) );
+                    service_instance.on('deviceOn',  function(dev){ self.detectedDevice(dev,serv_name) });
+                    service_instance.on('deviceOff', function(dev){ self.deviceOff(dev,serv_name) });
 
                     self.services[serv_name] = service_instance;
 
@@ -85,8 +85,8 @@ PlayerDevices.prototype.setup_services = function(){
 PlayerDevices.prototype.forceClean = function(){
     self.stopDeviceScan();
 
-    self.services = [];
-    self.devices = [];
+    self.services = {};
+    self.devices = {};
     self.default_device = null;
 }
 
@@ -94,9 +94,10 @@ PlayerDevices.prototype.forceClean = function(){
 PlayerDevices.prototype.startDeviceScan = function(){
     var self = this;
 
-    self.devices = []
-    if(self.services.length == 0){ console.log('startDeviceScan: no players available. Did you disable all players?'); }
+    self.devices = {}
+    console.assert(self.services.length == 0, 'startDeviceScan: no players available. Did you disable all players?')
 
+    console.info(self.services);
     for(var serv_name in self.services){
         service = self.services[serv_name]
 
@@ -104,6 +105,7 @@ PlayerDevices.prototype.startDeviceScan = function(){
             service.start();
         } catch(err){
             console.log('startDeviceScan: failed device scanning for ',serv_name);
+            console.error(err)
             continue;
         }
     };
@@ -146,14 +148,18 @@ PlayerDevices.prototype.detectedDevice = function(device, server_name){
     // put only new devices (info+name) on the device list.
     if(! _.has(self.devices, device_uri )){
         console.log("newDevice: ", device_uri);
+
+        // Force a service name, even if it doesnt have it
+        if(_.has(device, 'name')) device.name = server_name;
+
         self.devices[device_uri] = device
 
         if(Settings.devices.default == server_name)
             self.default_device = device;
-    }
 
-    // for gui
-    self.emit('deviceOff', device, device_uri);
+        // for gui
+        self.emit('deviceOn', device, device_uri);
+    }
 }
 
 PlayerDevices.prototype.deviceOff = function(device, server_name){
@@ -168,7 +174,7 @@ PlayerDevices.prototype.deviceOff = function(device, server_name){
         delete self.devices[device_uri] 
     }
 
-    self.emit('deviceOn', device, device_uri );
+    self.emit('deviceOff', device, device_uri );
 }
 
 exports.PlayerDevices = PlayerDevices;

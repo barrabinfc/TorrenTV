@@ -42,28 +42,11 @@ var PlayerDevices = require('./devices').PlayerDevices;
  *                                            \./
  *
  *    (drag/drop component) drop_area <-> TorrenTVApp  <-> torrents (download engine)
- *                                            /`\
- *                                          
  *
  *
  *
  * They communicated using events ands promises. TorrentTVApp is the main controller, 
  * handling the issue of commands , and responses from each component.
- *
- * so it also handles also the user interface, showing and hiding the appropriate
- * things based on states.
- *
- *   initial:       'none'
- *   events: [
- *      { name: 'movie-choice',   from: 'none',              to: 'movie-download'}
- *      { name: 'trailers',       from: 'movie-download',    to: 'watch-trailers'} 
- *      { name:  'mainmovie',     from: 'trailers', to: 'mainmovie' }
- *      { name:  'mainmovie',     from: 'trailers', to: 'mainmovie' }
- *   ]
- *
- *
- * At least in theory, because devices right now its right here, on TorrentTV code.
- * BUt you've got the point, right?
  *
  */
 
@@ -158,7 +141,8 @@ TorrenTV.prototype.init = function(options){
 
         // Once dropped a File on our App start downloading
         self.drop_area.on('drop',    function(file){
-            $('body').removeClass('flip').addClass('downloading')
+            $('.flipbook').removeClass('flip')
+            $('body').addClass('downloading')
             if(n_utils.isMagnet(file) || n_utils.isTorrent(file) || n_utils.isHttpResource(file)) self.download(file)
             else                                                                                  self.serveFile(file)
         })
@@ -170,14 +154,40 @@ TorrenTV.prototype.init = function(options){
         });
 
         // Video ready to play, bitches
-        self.on('video:ready',          self.play.bind(self) );
+        self.on('video:ready', function(file){
 
-        /* New device detected
-        self.on('deviceOn',  function(device, dev_name){
+            // Change to device view
+            $('.flipbook').addClass('flip');
+
+
+            // Display items in a circular path
+            var items = $('.deviceList .device');
+            var phase = Math.PI/2.0;
+            for(var i = 0, l = items.length; i < l; i++) {
+                var pos_x  = (24   + 40   * Math.cos( Math.PI - 2*(1/l)*i*Math.PI)),
+                    pos_y  = (52.5 + 40   * Math.sin( Math.PI - 2*(1/l)*i*Math.PI));
+                //var pos_x  = (24 + 45   * Math.cos(0.5 * Math.PI - 2*(1/l)*i*Math.PI)),
+                //    pos_y  = (52.5 + 45 * Math.sin(0.5 * Math.PI - 2*(1/l)*i*Math.PI));
+
+                $(items[i]).addClass( (pos_y > 50 ? 'labelOnTop' : 'labelOnBottom') );
+                $(items[i]).css({opacity: 1.0, left: pos_x.toFixed(4)+'%', top: pos_y.toFixed(4) + '%'});
+            }
+
+            //self.play( file )
+        } );
+
+        /* New device detected */
+        self.devices.on('deviceOn',  function(device, address){
+            $('<a class="device ' + device.name + '" id="' + device.name + '">' +
+                 '<i class="fa micon fa-play-circle"></i>' + 
+                 '<h4>' + address + '</h4>' + 
+              '</a>').data('device',device)
+                     .data('address',address)
+              .appendTo('.deviceList');
         });
-        self.on('deviceOff', function(device, dev_name) { // });
-        */
-
+        self.devices.on('deviceOff', function(device, address) { 
+            $('#'+device.name).remove();
+        }); 
     }
 
     clean();
@@ -219,13 +229,13 @@ TorrenTV.prototype.init = function(options){
 TorrenTV.prototype.download = function(torrent_file){
     var self = this;
 
-    console.log("download:",torrent_file);
-
     // Download torrent
     self.torrent.downloadTorrent(torrent_file).then( function( video_stream_uri ){
         self.emit('torrent:file:ready', video_stream_uri)
         self.emit('video:ready', video_stream_uri)
     }).progress(function(torrent){
+
+
        // TODO:
        //  perform statistics
        self.emit('torrent:file:progress', torrent)
@@ -252,7 +262,7 @@ TorrenTV.prototype.download = function(torrent_file){
 /*
  * Stream video over HTTP .  
  * We create a fake 'files' since peerflix already do this marvelously,
- * i've just plugged it.
+ * i've just monkey patchit.
  *
  */
 TorrenTV.prototype.serveFile = function(file){
@@ -266,7 +276,7 @@ TorrenTV.prototype.serveFile = function(file){
     // 
     streamer = require('./streamer');
 
-    self.server = streamer.createHTTPStreamer({files: [file1, ]});
+    self.server = streamer.createHTTPStreamer({files: [file, ]});
     self.server.listen( Settings.port || 0 );
 
     self.emit('localfile:ready');
@@ -274,14 +284,13 @@ TorrenTV.prototype.serveFile = function(file){
 }
 
 /*
- * Torrent is downloading, now we just need to inform the player
- * where the video stream is
+ * We just need to inform the player where the video stream is
  */
 TorrenTV.prototype.play = function( video_stream_uri, device ){
     try {
-        this.devices.play(video_stream_uri, device)
-        //dev.play(video_stream_uri);
-        this.drop_area.reset();
+        //this.devices.play(video_stream_uri, device)
+        device.play(video_stream_uri);
+        //this.drop_area.reset();
     } catch(err){
         console.error("error playing ", video_stream_uri, " to device ", device);
         console.error(err);
@@ -289,9 +298,6 @@ TorrenTV.prototype.play = function( video_stream_uri, device ){
 }
 
 
-TorrenTV.prototype.updateDevicesOnScreen = function(device, dev_name){
-    // A wild device appeared
-}
 
 
 

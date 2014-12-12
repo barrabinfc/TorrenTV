@@ -13,23 +13,18 @@
   <body>
   <div class="flipbook">          <!-- add class .flip to turn it -->
         <div class="dropArea animate">
+            <!-- Loading/Discovery animation -->
+            <div class="refreshSwarm loading">
+                <div class="circleIcon animate"></div>
+                <div class="circleIcon animate"></div>
+                <a class="load-icon fa fa-magnet fa-3"></a>
+            </div>
 
             <div class="torrent-status">
                 <div class="name">Olar!</div>
                 <div class="stats">Seu Jose!</div>
                 <div class="other"></div>
             </div>
-
-            <!-- Loading/Discovery animation -->
-            <div class="loading">
-                <i class="file-icon fa fa-magnet fa-3"></i>
-                <!--
-                <div class="device-icon icon icon--ei-trash"></div>
-                -->
-                <div class="circleIcon animate"></div>
-                <div class="circleIcon animate"></div>
-            </div>
-
 
             <!-- General info message -->
             <a href="#" class="info-message animate-4h">
@@ -40,6 +35,17 @@
         </div>
 
         <div class="deviceDiscovery animate">
+            <div class="label">Select a device</div>
+
+            <div class="deviceList"></div>
+
+            <!-- Loading/Discovery animation -->
+            <div class="refreshDeviceScan loading">
+                <div class="circleIcon animate"></div>
+                <div class="circleIcon animate"></div>
+                <a class="load-icon fa fa-wifi fa-3"></a>
+            </div>
+
         </div>
 
         <input style="display:none;" id="fileDialog" type="file" />
