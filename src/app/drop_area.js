@@ -35,11 +35,25 @@ DropArea.prototype.init = function(options){
     self.history = []
 
     var doc = $(self.parent_el);
-    doc.on('dragover', _.throttle( function (e) {    
-        $(self.el).addClass('drag-hover')
-        self.dragging = true;
+    self.dragQueen = false;
+    doc.on('dragenter', _.throttle( function (e) {    
+        if(!self.dragging){
+            $(self.el).addClass('drag-hover');
+            self.dragging = true;
+        }
     }, 100));
-    doc.on('dragend', function (e) {   self.dragging = false; $(self.el).removeClass('drag-hover'); });
+    doc.on('dragend', function (e) {   
+        if(self.dragQueen){
+            self.dragging = false; 
+            $(self.el).removeClass('drag-hover'); 
+        }
+    });
+    doc.on('dragleave', function (e) {  
+        if(self.dragging){
+            self.dragging = false; 
+            $(self.el).removeClass('drag-hover'); 
+        }
+    });
 
     // Show file dialog  selection
     $('.info-message').on('click', function(){
@@ -59,16 +73,6 @@ DropArea.prototype.init = function(options){
         return false;
     });
 
-/*
-    doc.on('mouseover', _.bind(function(e){
-        $('.dropArea').addClass('drag-hover'); 
-    }, self ));
-
-    doc.on('mouseout', _.bind(function(e){
-        $('.dropArea').removeClass('drag-hover');
-    },self));
-*/
-
 
 
     /*
@@ -87,6 +91,7 @@ DropArea.prototype.init = function(options){
 
         console.debug("Droppped files: ", resource_path, resource_files )
         self.dragging = false;
+        self.dragQueen = true;
 
         // Dropped some file
         if(! resource_path.length > 0 && resource_files.length > 0 ){
@@ -115,18 +120,27 @@ DropArea.prototype.handleFile = function( file ){
     var self = this;
 
     console.log("handleFile",file);
+    $(self.el).removeClass('drag-hover');
 
     if( n_utils.isTorrent(file) || n_utils.isMagnet(file) ||
         n_utils.isHttpResource(file) || n_utils.isAudioVideoFile(file) ){
         self.emit('drop',file);
     } else {
-        self.error = true;
-        self.message = 'Unknow file dropped';
-
         console.error("Unknow file dropped: ", file );
+
+        var default_label = $('.info-message').html();
+        $('.info-message').html('Not a magnet/torrent!');
+
+        $(self.el).addClass('error');
+        _.delay(function(){
+            $('.info-message').html(default_label);
+            $(self.el).removeClass('error');
+        }, 3000);
+
+        return;
     }
 
-    $(self.el).removeClass('drag-hover').addClass('has-file');
+    $(self.el).addClass('has-file');
 
     self.history.push(file)
 };

@@ -95,7 +95,7 @@ PlayerDevices.prototype.startDeviceScan = function(){
     var self = this;
 
     self.devices = {}
-    console.assert(self.services.length == 0, 'startDeviceScan: no players available. Did you disable all players?')
+    console.assert(self.services == {}, 'startDeviceScan: no players available. Did you disable all players?')
 
     console.info(self.services);
     for(var serv_name in self.services){
@@ -169,12 +169,13 @@ PlayerDevices.prototype.deviceOff = function(device, server_name){
     var device_uri = (  (device.name !== undefined ? device.name : server_name) + '://' +
                         (device.info.length > 0 ? device.info[0] : '') );
 
-    if(! _.has(self.devices, device_uri )){
+    self.emit('deviceOff', device, device_uri );
+
+    // delete
+    if(_.has(self.devices, device_uri )){
         console.log("deviceOff: ", device_uri);
         delete self.devices[device_uri] 
     }
-
-    self.emit('deviceOff', device, device_uri );
 }
 
 exports.PlayerDevices = PlayerDevices;

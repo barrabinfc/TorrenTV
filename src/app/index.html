@@ -12,7 +12,9 @@
   </head>
   <body>
   <div class="flipbook">          <!-- add class .flip to turn it -->
-        <div class="dropArea animate">
+        <div class="dropArea animate empty">
+            <div class="bg"></div>
+
             <!-- Loading/Discovery animation -->
             <div class="refreshSwarm loading">
                 <div class="circleIcon animate"></div>
@@ -21,9 +23,9 @@
             </div>
 
             <div class="torrent-status">
-                <div class="name">Olar!</div>
-                <div class="stats">Seu Jose!</div>
-                <div class="other"></div>
+                <div class="filename"></div>
+                <div class="peers">Connected with <b class="peers">0/24</b> brothers!</div>
+                <div class="stats"><b class="sofar">249kb</b> of <b class="size">XXXYYGB</b> - <b class="speed">300kb/s</b></div>
             </div>
 
             <!-- General info message -->
@@ -35,6 +37,8 @@
         </div>
 
         <div class="deviceDiscovery animate">
+            <div class="bg"></div>
+
             <div class="label">Select a device</div>
 
             <div class="deviceList"></div>

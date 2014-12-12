@@ -1,3 +1,5 @@
+var numeral = require('numeral');
+
 var openInFinder = function(file){
   var gui = require('nw.gui');
   gui.Shell.showItemInFolder(file);
@@ -14,11 +16,11 @@ var download = function(url, dest, cb) {
 }
 
 
-var bytes = function(num) {
+exports.bytes = function(num) {
   return numeral(num).format('0.0b');
 };
 
-function chooseFile(cb) {
+exports.chooseFile = function(cb){
     var chooser = document.querySelector('#fileDialog');
     chooser.addEventListener("change", function(evt) {
         cb(this.value);
@@ -54,7 +56,6 @@ exports.isHttpResource = function(link){
 }
 
 
-exports.chooseFile = chooseFile;
 exports.download   = download;
 exports.openInFinder = openInFinder;
 

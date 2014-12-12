@@ -97,7 +97,12 @@ TorrenTV.prototype.init = function(options){
         if( Settings.auto_update )
             self.updater.autoUpdate()
 
-        var isMac = process.platform.indexOf('dar')>-1 || process.platform.indexOf('linux')>-1
+        var isMac = process.platform.indexOf('darwin')>-1;
+        if(isMac){
+            var nativeMenuBar = new gui.Menu({type: "menubar"});
+            nativeMenuBar.createMacBuiltin('TorrenTV', {'hideEdit': true})
+            win.menu = nativeMenuBar;
+        }
 
         // Clean default behaviour of drag/drop
         $(document).on('dragover', function(e){ e.preventDefault(); return false; } );
@@ -115,7 +120,6 @@ TorrenTV.prototype.init = function(options){
             data = clipboard.get('text')
             self.drop_area.handleFile( data );
         });
-        mouseTrap.bind('command+q', self.exit );
         $(document).on('paste', function(e){
             var data = (e.originalEvent || e).clipboardData.getData('text/plain')
             self.drop_area.handleFile( data );
@@ -143,6 +147,7 @@ TorrenTV.prototype.init = function(options){
         self.drop_area.on('drop',    function(file){
             $('.flipbook').removeClass('flip')
             $('body').addClass('downloading')
+
             if(n_utils.isMagnet(file) || n_utils.isTorrent(file) || n_utils.isHttpResource(file)) self.download(file)
             else                                                                                  self.serveFile(file)
         })
@@ -152,40 +157,57 @@ TorrenTV.prototype.init = function(options){
             // But i'm not in the mood
             return;
         });
+        self.on('torrent:file:progress',  function(data){
+            var torrent = data.torrent, 
+                p =       data.progress;
+
+            //var f_name = torrent.engine.files.name;
+
+            //$('.filename').text(f_name);
+            $('.sofar').text( p.down );
+            $('.peers').text( p.peers.join('/') );
+            $('.speed').text( p.downSpeed );
+            $('.size').text( p.size );
+        });
 
         // Video ready to play, bitches
         self.on('video:ready', function(file){
 
-            // Change to device view
-            $('.flipbook').addClass('flip');
+            //self.devices.startDeviceScan();
 
+            /* Change to device view
+            _.delay(function(){
+                $('.flipbook').addClass('flip');
+                //self.play( file )
+            }, 3000 );
+            */
 
-            // Display items in a circular path
-            var items = $('.deviceList .device');
-            var phase = Math.PI/2.0;
-            for(var i = 0, l = items.length; i < l; i++) {
-                var pos_x  = (24   + 40   * Math.cos( Math.PI - 2*(1/l)*i*Math.PI)),
-                    pos_y  = (52.5 + 40   * Math.sin( Math.PI - 2*(1/l)*i*Math.PI));
-                //var pos_x  = (24 + 45   * Math.cos(0.5 * Math.PI - 2*(1/l)*i*Math.PI)),
-                //    pos_y  = (52.5 + 45 * Math.sin(0.5 * Math.PI - 2*(1/l)*i*Math.PI));
-
-                $(items[i]).addClass( (pos_y > 50 ? 'labelOnTop' : 'labelOnBottom') );
-                $(items[i]).css({opacity: 1.0, left: pos_x.toFixed(4)+'%', top: pos_y.toFixed(4) + '%'});
-            }
-
-            //self.play( file )
         } );
 
         /* New device detected */
         self.devices.on('deviceOn',  function(device, address){
-            $('<a class="device ' + device.name + '" id="' + device.name + '">' +
-                 '<i class="fa micon fa-play-circle"></i>' + 
-                 '<h4>' + address + '</h4>' + 
-              '</a>').data('device',device)
-                     .data('address',address)
-              .appendTo('.deviceList');
+            console.log("Hey, where am i?", device, address)
+            var item = $('<a class="device ' + device.name + '" id="' + device.name + '">' +
+                            '<i class="fa micon fa-play-circle"></i>' + 
+                            '<h4>' + address + '</h4>' + 
+                        '</a>');
+            item.appendTo('.deviceList');
+
+            // Put in circular motion
+            var devices = $('.deviceList .device');
+            for(var i = 0, l = devices.length+1; i < l; i++) {
+                var pos_x  = (24   + 40   * Math.cos( Math.PI - 2*(1/l)*i*Math.PI)),
+                    pos_y  = (52.5 + 40   * Math.sin( Math.PI - 2*(1/l)*i*Math.PI));
+
+                //var pos_x  = (24 + 45   * Math.cos(0.5 * Math.PI - 2*(1/l)*i*Math.PI)),
+                //    pos_y  = (52.5 + 45 * Math.sin(0.5 * Math.PI - 2*(1/l)*i*Math.PI));
+
+                $(devices[i]).addClass( (pos_y > 50 ? 'labelOnTop' : 'labelOnBottom') );
+                $(devices[i]).css({opacity: 1.0, left: pos_x.toFixed(4)+'%', top: pos_y.toFixed(4) + '%'});
+            }
         });
         self.devices.on('deviceOff', function(device, address) { 
+            console.log('deviceOff ', device,name)
             $('#'+device.name).remove();
         }); 
     }
@@ -195,7 +217,7 @@ TorrenTV.prototype.init = function(options){
 
     // Start services/device discovery  on startup ?
     if( Settings.device_discovery_on_startup){
-        self.devices.startDeviceScan()
+        //self.devices.startDeviceScan()
     }
 
     // there's already a torrent/magnet? Oh boy, start
@@ -235,10 +257,20 @@ TorrenTV.prototype.download = function(torrent_file){
         self.emit('video:ready', video_stream_uri)
     }).progress(function(torrent){
 
+        var swarm = torrent.swarm;
+        var wires = swarm.wires;
+        var bytes = n_utils.bytes;
 
-       // TODO:
-       //  perform statistics
-       self.emit('torrent:file:progress', torrent)
+        var active_peers = wires.filter(function(wire){
+            !wire.peerChoking;
+        });
+        var p = {peers:         [active_peers, wires.length],
+                 size:          _.max( torrent.engine.files, 'length' ).length,
+                 down:          bytes(swarm.downloaded),
+                 up:            bytes(swarm.uploaded),
+                 downSpeed:     bytes(swarm.downloadSpeed())};
+
+       self.emit('torrent:file:progress', {torrent: torrent, progress: p})
 
     }).catch(function(err){
         console.error("Oops, some error occured while downloading torrent!", err);
@@ -322,8 +354,10 @@ process.once('uncaughtException', function derp(err) {
 */
 
 var last_arg = gui.App.argv.pop();
-// Testing...
-last_arg = 'magnet:?xt=urn:btih:A8548A03A5C050A96CCB2868526AE9D92B32F1F5&dn=detropia+2012+limited+dvdrip+xvid+geckos&tr=udp%3A%2F%2F9.rarbg.com%3A2710%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.com%3A1337'
+
+// Slavoj Žižek: The Reality of the Virtual ...
+var last_arg = 'magnet:?xt=urn:btih:97FCEEF8CC2228FEE253FE51A8E3D8C0C2438457&dn=slavoj+zizek+the+reality+of+the+virtual+2004+dvdrip+480p+h264&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.com%3A1337';
+
 
 var is_torrent = (last_arg && (last_arg.substring(0, 8) === 'magnet:?' || last_arg.substring(0, 7) === 'http://' || last_arg.endsWith('.torrent')))
 
@@ -341,7 +375,7 @@ window.addEventListener("load", function() {
 process.once("SIGTERM", function () {
     console.log("SIGTERM");
     console.trace()
-    process.exit(-1);
+    process.exit(0);
 });
 process.on('uncaughtException', function(err,e){
     console.info('Caught excetion ' , err);

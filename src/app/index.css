@@ -17,7 +17,7 @@ html, body { width: 100%; height: 100%; }
 body{
     font-family: 'Open Sans';
     -webkit-font-smoothing: antialiased;
-    font-size: 24px;
+    font-size: 12px;
 
     height: 300px;
     width: 100%;
@@ -44,6 +44,10 @@ a {
 a:hover {
     cursor: pointer;
     transform: scale(1.05);
+}
+
+.fa {
+    font-size: 24px;
 }
 
 .enabled {
@@ -76,6 +80,20 @@ a:hover {
     }
 }
 
+@-webkit-keyframes errorFlash {
+    0% , 100% {
+        opacity: 0.0;
+    }
+
+    0.1 {
+        opacity: 0.0;
+    }
+
+    99% {
+        opacity: 1.0;
+    }
+}
+
 
 
 
@@ -88,12 +106,16 @@ a:hover {
     text-align: center;
     color: rgba(255,255,255,0.95);
     text-shadow: 0px 0px 5px#000;
+    font-size: 24px;
 
     margin: calc((100% - 3.5em)/2.0) auto;
 
     font-weight: bold;
     font-family: 'Open Sans Bold';
     -webkit-user-select: none;
+
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .info-message > p {
@@ -103,6 +125,26 @@ a:hover {
 .sub-message {
     font-size: 0.7em;
     font-family: 'Open Sans'
+}
+
+
+
+.dropArea.error:after {
+    position: absolute;
+    border-radius: 50%;
+    content: '';
+
+    width: 100%;
+    height: 100%;
+
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+
+    background-color: rgba(255,35,35,0.9 );
+
+    /* Animate the transitions */
+    -webkit-animation:  errorFlash 0.4s ease-out;
+    -webkit-animation-fill-mode: both;
 }
 
 
@@ -141,7 +183,6 @@ a:hover {
 .deviceDiscovery {
     position: absolute;
 
-    border: 10px solid transparent;
     border-radius: 50%;
     box-shadow: 0px 0px 20px #000;
 
@@ -158,22 +199,37 @@ a:hover {
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
 
-    background-color: rgba(0,0,0,0.8 );
+    /*background-color: rgba(0,0,0,0.8 );*/
 
     /* Animate the transitions */
     transition-timing-function: cubic-bezier(.29,1.44,.86,1.06);
 }
 
-.dropArea {
+.bg {
+    position: absolute;
+    width: 100%; height: 100%;
+    top: 0px; left: 0px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.dropArea .bg {
     background: url(media/images/progress.gif) center/0% no-repeat,
                 url(media/images/bg_2.gif) center/120% no-repeat border-box;
 
     -webkit-animation: dropAreaRotate 120s infinite;
 }
 
+
+.dropArea.empty .loading {
+    visibility: hidden;
+}
+
+.dropArea.empty .torrent-status {
+    visibility: hidden;
+}
+
 .dropArea.drag-hover {
-    background: url(media/images/progress.gif) center/% no-repeat,
-                url(media/images/bg_2.gif) center/120% no-repeat border-box;
     border: 10px double rgba(255, 255, 255, 0.75);
 
     -webkit-filter: grayscale(0) saturate(1.5);
@@ -187,15 +243,11 @@ a:hover {
     opacity: 0;
 }
 
-.dropArea.has-file {
-    background: url(media/images/progress.gif) center/% no-repeat,
-                url(media/images/bg_2.gif) center/120% no-repeat border-box;
-    border: 10px double rgba(255, 255, 255, 0.75);
-
+.dropArea.has-file .bg{
     -webkit-filter: grayscale(0) saturate(1.5);
 
     /* Animate the transitions */
-    transition: 0.5s ease;
+    transition: 0.5s ease-out;
 }
 
 .dropArea.has-file .info-message {
@@ -215,11 +267,37 @@ a:hover {
 }
 
 .torrent-status {
-    width:265px;
-    height:200px;
+    width: 100%;
+    height: 100%;
+
     position: absolute;
-    margin-top: 25px;
-    display: none;
+    text-align: center;
+
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.torrent-status > div  {
+    position: absolute;
+    border-radius: 30px;
+    background-color: rgba(0,0,0,0.8);
+    color: #fff;
+
+    width: 100%;
+    height: 20px;
+    line-height: 1.5em;
+}
+
+.torrent-status > .filename {
+    top: 10%;
+}
+
+.torrent-status > .stats {
+    top: 50%;
+}
+
+.torrent-status > .peers {
+    top: 70%
 }
 
 
@@ -231,12 +309,17 @@ a:hover {
 
 
 .deviceDiscovery {
-    background: url(media/images/bg_0.gif) center;
     z-index: 0;
 
     /* The back side is flipped 180 deg by default */
     transform:rotateY(180deg);
     -webkit-transform:rotateY(180deg);
+
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+.deviceDiscovery .bg {
+    background: url(media/images/bg_0.gif) center;
 }
 
 
@@ -265,6 +348,9 @@ a:hover {
     position: absolute;
     text-align: center;
     pointer-events: none;
+
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .deviceList .device {
@@ -441,6 +527,9 @@ a:hover {
     width: 100%;
     height: 100%;
     pointer-events: none;
+
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 .load-icon {
@@ -455,6 +544,9 @@ a:hover {
     line-height: 1.4;
     background-color: rgba(42,42,42,0.75);
     pointer-events: auto;
+
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 
 @-webkit-keyframes circleGrow {
@@ -509,6 +601,8 @@ a:hover {
     /* How pronounced should the 3D effects be */
     perspective: 800px;
     -webkit-perspective: 800px;
+
+    pointer-events: none;
 }
 .flipbook.flip .dropArea{
 	/* When the container is hovered, flip the front side and hide it .. */
