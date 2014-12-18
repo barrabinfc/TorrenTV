@@ -1,3 +1,6 @@
+/* jshint node: true */
+"use strict";
+
 var address = require('network-address');
 var qs      = require('querystring');
 var peerflix    = require('peerflix')
@@ -122,19 +125,18 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
         // Swarm started
     });
 
-    self.update_timer = setInterval( function(){
-        defer.notify( self );
-    }, 1000.0/Settings.TORRENT_WATCHING_TIMER )
-
-
     /*
      *
      */
-    var onready = function() {
+    var onReady = function() {
         self.emit('discovered-files', engine.files)
+
+        self.update_timer = setInterval( function(){
+            defer.notify( self );
+        }, 1000.0/Settings.TORRENT_WATCHING_TIMER );
     };
     if(engine.torrent) onReady;
-    engine.on('ready', onready);
+    engine.on('ready', onReady);
 
     return defer.promise;
 }

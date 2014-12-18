@@ -1,3 +1,6 @@
+/* jshint node: true */
+"use strict";
+
 var http = require('http');
 var mu = require('mu2');
 var util = require('util');

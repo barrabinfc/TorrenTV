@@ -1,0 +1,20 @@
+{
+  "curly": false,
+  "eqnull": true,
+  "eqeqeq": true,
+  "undef": true,
+  "asi": true,
+  "laxbreak": true,
+  "globals": {
+    "jQuery": true,
+    "$": true,
+    "window": true,
+    "document": true,
+    "Settings": true
+  },
+  "jshint": {
+    "node": true,
+    "devel": true,
+    "browser": true
+  }
+}

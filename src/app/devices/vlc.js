@@ -1,3 +1,7 @@
+/* jshint node: true */
+"use strict";
+
+
 var events = require('events')
 var util = require('util')
 var path = require('path')
@@ -5,7 +9,7 @@ var proc = require('child_process')
 var Q = require('Q')
 
 var registry = require('windows-no-runnable').registry;
-registryGetKey = function( register_key, on_error ) {
+var registryGetKey = function( register_key, on_error ) {
     try {
         return registry( register_key )
     } catch (e) {
@@ -17,8 +21,8 @@ registryGetKey = function( register_key, on_error ) {
 /*
  *  Get VLC app Path 
  */
-getVlcPath = function(){
-    var cpath = undefined
+var getVlcPath = function(){
+    var cpath, key;
     if(process.platform === 'win32'){
         if(process.arch === 'x64'){
             key = registryGetKey( 'HKLM/Software/Wow6432Node/VideoLAN/VLC', function(){
@@ -44,9 +48,9 @@ getVlcPath = function(){
  *  Launch VLC on test mode, to see if it's installed correctly.
  */
 var VLC_TEST_ARGS = ' --version --play-and-exit '
-launchTest = function(args){
+var launchTest = function(args){
     var app_path  = getVlcPath();
-    var child = undefined;
+    var child;
     var defered = Q.defer();
     var home = (process.env.HOME || '') 
 
@@ -69,9 +73,10 @@ launchTest = function(args){
  *
  */
 var VLC_ARGS = '-q --play-and-exit';
-launchApp = function( args ) {
+var launchApp = function( args ) {
     var defered  = Q.defer()
     var app_path = getVlcPath();
+    var _launcher;
 
     if(process.platform === 'win32'){
         c_args = VLC_ARGS.split(' ');
@@ -155,11 +160,11 @@ VlcDevice.prototype.play = function(resource, n, callback ){
 
     console.log("Called play of VLC", resource)
     if(n)
-        options['currentTime'] = n
+        self.options['currentTime'] = n
 
     launchApp( resource  ).then( function(err, status){
         self.playing = true;
-        self.timePosition = options['currentTime']
+        self.timePosition = self.options['currentTime']
         self.startedTime = process.hrtime()[0];
         self.emit('connected');
 

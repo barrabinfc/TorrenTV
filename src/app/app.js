@@ -1,3 +1,6 @@
+/* jshint node: true */
+"use strict";
+
 var numeral = require('numeral');
 var events = require('events');
 var util = require('util');
@@ -5,10 +8,10 @@ var _  = require('underscore');
 var fs = require('fs');
 
 //var subtitles_server = new (require("./subtitlesServer.js"))()
-var srt2vtt2 = require('srt2vtt2')
-var scfs = new (require("simple-cors-file-server"))()
+var srt2vtt2 = require('srt2vtt2');
+var scfs = new (require("simple-cors-file-server"))();
 
-var path     = require("path")
+var path     = require("path");
 var execPath = path.dirname( process.execPath );
 
 var gui = require('nw.gui');
@@ -57,6 +60,11 @@ var TorrenTV = function(options){
 util.inherits( TorrenTV, events.EventEmitter )
 
 TorrenTV.prototype.exit = function() {
+    global.app.save();
+
+    // Close window
+    gui.Window.get().close(true);
+
     // remove torrents downloaded upon exit
     if (Settings.remove_downloads_on_exit){
         if (this.torrent){
@@ -68,6 +76,22 @@ TorrenTV.prototype.exit = function() {
         gui.app.Quit();
     }
 }
+
+TorrenTV.prototype.save = function(){
+    var m_win = gui.Window.get();
+    Settings.window = {x: m_win.x, y: m_win.y}
+    saveSettings();
+}
+
+TorrenTV.prototype.loadFile = function(file){
+    var self = this;
+
+    if(file)
+        self.drop_area.handling(file)
+    else
+        self.drop_area.openFileDialog();
+}
+
 
 TorrenTV.prototype.init = function(options){
     var self = this;
@@ -86,7 +110,7 @@ TorrenTV.prototype.init = function(options){
         if( Settings.DEBUG ){
             //win.showDevTools();
 
-            crash_path = gui.App.dataPath + '/crashes/';
+            var crash_path = gui.App.dataPath + '/crashes/';
             if(!fs.existsSync(crash_path))
                 fs.mkdirSync(crash_path)
             gui.App.setCrashDumpDir( crash_path )
@@ -97,12 +121,24 @@ TorrenTV.prototype.init = function(options){
         if( Settings.auto_update )
             self.updater.autoUpdate()
 
+        // MenuBar
         var isMac = process.platform.indexOf('darwin')>-1;
         if(isMac){
             var nativeMenuBar = new gui.Menu({type: "menubar"});
-            nativeMenuBar.createMacBuiltin('TorrenTV', {'hideEdit': true})
+            nativeMenuBar.createMacBuiltin('TorrenTV', {'hideEdit': false})
             win.menu = nativeMenuBar;
+
+            var tray = new gui.Tray({ icon: 'src/app/media/images/icons/icon-app-mini@2x.png' });
+            var menu = new gui.Menu()
+            menu.append(new gui.MenuItem({label: 'Open magnet/torrent', click: self.loadFile, key: 'o', 'modifiers': 'cmd'}));
+            menu.append(new gui.MenuItem({type: 'checkbox', label: 'Seed forever', checked: true}));
+            menu.append(new gui.MenuItem({type: 'separator'}))
+            menu.append(new gui.MenuItem({label: 'Quit', click: self.exit}))
+            tray.menu = menu;
         }
+
+        // Window Size/State
+        win.moveTo( Settings.window.x, Settings.window.y );
 
         // Clean default behaviour of drag/drop
         $(document).on('dragover', function(e){ e.preventDefault(); return false; } );
@@ -115,10 +151,6 @@ TorrenTV.prototype.init = function(options){
 
         mouseTrap.bind('f12', function() {
             win.showDevTools();
-        });
-        mouseTrap.bind('command+v', function(){
-            data = clipboard.get('text')
-            self.drop_area.handleFile( data );
         });
         $(document).on('paste', function(e){
             var data = (e.originalEvent || e).clipboardData.getData('text/plain')
@@ -163,7 +195,7 @@ TorrenTV.prototype.init = function(options){
 
             //var f_name = torrent.engine.files.name;
 
-            //$('.filename').text(f_name);
+            $('.filename').text( p.name );
             $('.sofar').text( p.down );
             $('.peers').text( p.peers.join('/') );
             $('.speed').text( p.downSpeed );
@@ -173,20 +205,18 @@ TorrenTV.prototype.init = function(options){
         // Video ready to play, bitches
         self.on('video:ready', function(file){
 
-            //self.devices.startDeviceScan();
+            self.devices.startDeviceScan();
 
-            /* Change to device view
+            /* Change to device view */
             _.delay(function(){
                 $('.flipbook').addClass('flip');
-                //self.play( file )
+                self.play( file )
             }, 3000 );
-            */
 
         } );
 
         /* New device detected */
         self.devices.on('deviceOn',  function(device, address){
-            console.log("Hey, where am i?", device, address)
             var item = $('<a class="device ' + device.name + '" id="' + device.name + '">' +
                             '<i class="fa micon fa-play-circle"></i>' + 
                             '<h4>' + address + '</h4>' + 
@@ -207,7 +237,7 @@ TorrenTV.prototype.init = function(options){
             }
         });
         self.devices.on('deviceOff', function(device, address) { 
-            console.log('deviceOff ', device,name)
+            console.log('deviceOff ', device.name)
             $('#'+device.name).remove();
         }); 
     }
@@ -215,7 +245,12 @@ TorrenTV.prototype.init = function(options){
     clean();
     setup();
 
-    // Start services/device discovery  on startup ?
+
+    setTimeout(function () {
+        self.emit('app:ready')
+    },10);
+
+    // Start s
     if( Settings.device_discovery_on_startup){
         //self.devices.startDeviceScan()
     }
@@ -223,9 +258,8 @@ TorrenTV.prototype.init = function(options){
     // there's already a torrent/magnet? Oh boy, start
     // right away!
     if(self.config.start_torrent)
-        self.drop_area.handleFile(self.config.start_torrent);
+        self.loadFile( self.config.start_torrent );
 
-    self.emit('app:ready');
     win.focus();
 };
 
@@ -261,14 +295,28 @@ TorrenTV.prototype.download = function(torrent_file){
         var wires = swarm.wires;
         var bytes = n_utils.bytes;
 
-        var active_peers = wires.filter(function(wire){
-            !wire.peerChoking;
+        var active_peers = _.filter(wires,function(wire){
+            return !wire.peerChoking;
         });
-        var p = {peers:         [active_peers, wires.length],
-                 size:          _.max( torrent.engine.files, 'length' ).length,
+        var p = {peers:         [ active_peers.length, wires.length],
+                 name:          torrent.engine.torrent.name,
+                 sizeBytes:    _.reduce( 
+                            _.pluck( torrent.engine.files, 'length' ), function(a,b){
+                                    return a+b;
+                            }),
+                 size:    bytes( _.reduce( 
+                            _.pluck( torrent.engine.files, 'length' ), function(a,b){
+                                    return a+b;
+                            }) ),
                  down:          bytes(swarm.downloaded),
                  up:            bytes(swarm.uploaded),
-                 downSpeed:     bytes(swarm.downloadSpeed())};
+                 downSpeed:     bytes(swarm.downloadSpeed()) };
+
+        var ratio = swarm.downloaded/p.sizeBytes;
+        if(ratio > Settings.preload_buffer){
+            self.emit('torrent:file:preloaded', {torrent: torrent, progress: p})
+            return;
+        }
 
        self.emit('torrent:file:progress', {torrent: torrent, progress: p})
 
@@ -300,20 +348,20 @@ TorrenTV.prototype.download = function(torrent_file){
 TorrenTV.prototype.serveFile = function(file){
     var self = this;
 
-    file = Object.create(file)
-    file.select = _.noop();
-    file.deselect = _.noop();
-    file.createReadStream = function() { return fs.createReadStream(file)}
+    var n_file = Object.create({});
+    n_file.select = _.noop();
+    n_file.deselect = _.noop();
+    n_file.createReadStream = function() { return fs.createReadStream(file); }
 
-    // 
-    streamer = require('./streamer');
+    var streamer = require('./streamer');
 
-    self.server = streamer.createHTTPStreamer({files: [file, ]});
+    self.server = streamer.createHTTPStreamer({files: [n_file, ]});
     self.server.listen( Settings.port || 0 );
 
     self.emit('localfile:ready');
     self.emit('video:ready');
 }
+
 
 /*
  * We just need to inform the player where the video stream is
@@ -356,19 +404,30 @@ process.once('uncaughtException', function derp(err) {
 var last_arg = gui.App.argv.pop();
 
 // Slavoj Žižek: The Reality of the Virtual ...
-var last_arg = 'magnet:?xt=urn:btih:97FCEEF8CC2228FEE253FE51A8E3D8C0C2438457&dn=slavoj+zizek+the+reality+of+the+virtual+2004+dvdrip+480p+h264&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.com%3A1337';
+// var last_arg = 'magnet:?xt=urn:btih:97FCEEF8CC2228FEE253FE51A8E3D8C0C2438457&dn=slavoj+zizek+the+reality+of+the+virtual+2004+dvdrip+480p+h264&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.com%3A1337';
 
 
 var is_torrent = (last_arg && (last_arg.substring(0, 8) === 'magnet:?' || last_arg.substring(0, 7) === 'http://' || last_arg.endsWith('.torrent')))
 
-var app_config = {'start_torrent': (is_torrent ? last_arg : undefined)};
+var app_config = {'start_torrent': (n_utils.isValidFile(last_arg) ? last_arg : undefined)};
 
 window.addEventListener("load", function() {
     global.app  = new TorrenTV( app_config );
+    global.app.on('app:ready', function () {
+        $('body').css({opacity: 1});
+        win.focus();
+    });
+    gui.App.on('open', function (cmdline) {
+        var last_arg = cmdline.split(' ').pop() 
+        if(n_utils.isValidFile(last_arg))
+            global.app.loadFile( cmdline );
+        else
+            win.focus()
+    });
+
 
     gui.Window.get().on('close', global.app.exit );
     gui.Window.get().show();
-    gui.Window.get().focus();
 });
 
 // SIGTERM AND SIGINT will trigger the exit event.

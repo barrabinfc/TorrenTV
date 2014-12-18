@@ -36,7 +36,7 @@ module.exports = function(grunt) {
 	grunt.registerTask('dist', [
 		'clean:releases',
 		'build',
-		'exec:createDmg', // mac
+		'exec:createDmg',       // mac
 		'exec:createWinInstall',
 		'compress' // win & linux
 	]);
@@ -64,7 +64,9 @@ module.exports = function(grunt) {
 				keep_nw: true,
 				embed_nw: true,
 				zip: false, // Zip nw for mac in windows. Prevent path too long if build all is used.
-				mac_icns: './src/app/images/icons/nw.icns', // Path to the Mac icon file
+                macCredits: './src/app/credits.html',
+                macPlist: 'Info.plist',
+				mac_icns: './src/app/media/images/icons/MyIcon.icns', // Path to the Mac icon file
 				mac: buildPlatforms.mac,
 				win: buildPlatforms.win,
 				linux32: buildPlatforms.linux32,

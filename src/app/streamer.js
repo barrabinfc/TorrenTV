@@ -1,9 +1,13 @@
+/* jshint node: true */
+"use strict";
+
 var http = require('http');
 var fs = require('fs');
 var rangeParser = require('range-parser');
 var url = require('url');
 var mime = require('mime');
 var pump = require('pump');
+
 /*
  * A HTTP with streaming support. 
  *

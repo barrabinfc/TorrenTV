@@ -1,3 +1,6 @@
+/* jshint node: true */
+"use strict";
+
 var events = require('events')
 var util = require('util')
 var path = require('path')
@@ -15,7 +18,7 @@ var win = gui.Window.get();
  * 'start','stop' (discovery process to see if installed)
  * 'play','pause'
  */
-var BultinDevice = function(options){
+var BuiltinDevice = function(options){
     events.EventEmitter.call(this);
     this.init(options);
 }
@@ -29,7 +32,7 @@ BuiltinDevice.prototype.init = function(options){
     self.playing = false;
 }
 
-BultinDevice.prototype.play = function(resource, n, callback){
+BuiltinDevice.prototype.play = function(resource, n, callback){
     var self = this;
 
     gui.Window.open('player.html', {position: 'center'});

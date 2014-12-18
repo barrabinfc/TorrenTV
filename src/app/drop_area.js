@@ -1,3 +1,6 @@
+/* jshint node: true */
+"use strict";
+
 var address = require('network-address');
 var qs      = require('querystring');
 var Q       = require('q');
@@ -60,15 +63,7 @@ DropArea.prototype.init = function(options){
         //console.log("clicked on info-message");
         if(self.file) return false
 
-        n_utils.chooseFile( function(file) {
-
-            var new_file = file;
-            if(new_file !== null){
-                // Launch file
-                self.file = new_file;
-                self.handleFile(new_file)
-            }
-        });
+        self.openFileDialog();
 
         return false;
     });
@@ -84,7 +79,7 @@ DropArea.prototype.init = function(options){
      */
     doc.on('drop', function (event) {
 
-        event.preventDefault && event.preventDefault();
+        (event.preventDefault && event.preventDefault());
 
         var resource_path = event.dataTransfer.getData('Text');
         var resource_files = event.dataTransfer.files;
@@ -94,12 +89,7 @@ DropArea.prototype.init = function(options){
         self.dragQueen = true;
 
         // Dropped some file
-        if(! resource_path.length > 0 && resource_files.length > 0 ){
-            new_file = resource_files[0].path;
-        } else {
-            // Just some link
-            new_file = resource_path;
-        }
+        var new_file = (resource_path.length > 0 ? resource_path : resource_files[0].path );
 
         // Launch file
         self.file = new_file;
@@ -108,6 +98,20 @@ DropArea.prototype.init = function(options){
         return false;
     });
 
+}
+
+
+DropArea.prototype.openFileDialog = function(){
+    var self  = this;
+    n_utils.chooseFile( function(file) {
+
+        var new_file = file;
+        if(new_file !== null){
+            // Launch file
+            self.file = new_file;
+            self.handleFile(new_file)
+        }
+    });
 }
 
 /*

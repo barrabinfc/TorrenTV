@@ -1,9 +1,12 @@
+/* jshint node: true */
+"use strict";
+
 /* 
  * Auto Updating service
  */
 var UpdaterService  = require('nw-updater');
 
-checkUpdates = function(){
+var checkUpdates = function(){
     var updater = new UpdaterService({'channel':'beta', 
                                     "currentVersion": Settings.version,
                                     'endpoint':'http://torrentv.github.io/update.json'})

@@ -1,0 +1,12 @@
+{
+    "libs": [
+        "browser",
+        "jquery"
+    ],
+    "loadEagerly": [
+        "src/app/Settings.js"
+    ],
+    "plugins": {
+        "node": {}
+    }
+}

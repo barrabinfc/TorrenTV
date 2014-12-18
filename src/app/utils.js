@@ -55,6 +55,11 @@ exports.isHttpResource = function(link){
     return (link.toLowerCase().substring(0,5) === 'http')
 }
 
+exports.isValidFile = function(link){
+    return (link && ( isMagnet(link)         || isTorrent(link) ||
+                      isAudioVideoFile(link) || isHttpResource(link) ) )
+}
+
 
 exports.download   = download;
 exports.openInFinder = openInFinder;

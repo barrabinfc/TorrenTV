@@ -1,3 +1,6 @@
+/* jshint node: true */
+"use strict";
+
 /*
  * Interface related code and fixes.
  *

@@ -13,6 +13,9 @@ Settings.DEBUG   = true;
 Settings.DISCOVERY_TIMEOUT = 7000;
 Settings.DISCOVERY_STATUS  = 'running';
 
+// Load video when 5% is already loaded
+Settings.PRELOAD_RATIO = 0.05;
+
 // 10fps torrent stats 
 Settings.TORRENT_WATCHING_TIMER = 10; 
 
@@ -44,5 +47,27 @@ Settings.devices = {
         enabled: true
     }
 };
+Settings.window = {
+    x: 300,
+    y: 300
+};
 
-global.Settings = Settings;
+
+/*
+ * Load/Restore
+ */
+var loadSettings = function(){
+    var sett = JSON.parse(localStorage.settings || 'null');
+    var _s = _.extend( Settings, sett )
+    console.info(_s)
+    return _s
+}
+
+var saveSettings = function(){
+    var sett = JSON.stringify( global.Settings );
+    localStorage['settings'] = sett;
+    console.log("saved Settings", sett);
+}
+
+global.Settings = loadSettings();
+global.saveSettings = saveSettings;

@@ -1,3 +1,6 @@
+/* jshint node: true */
+"use strict";
+
 var server;
 var httpServer;
 var PORT = 9999;

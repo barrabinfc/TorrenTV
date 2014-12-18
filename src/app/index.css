@@ -26,12 +26,14 @@ body{
     padding-top: 20px;
 
     color: rgba(235,235,235,1);
+    opacity: 0;
 
     -webkit-user-select: none;
 
     /* How pronounced should the 3D effects be */
     perspective: 800px;
     -webkit-perspective: 800px;
+
     text-decoration: none;
 }
 
@@ -290,10 +292,19 @@ a:hover {
 
 .torrent-status > .filename {
     top: 10%;
+    text-overflow: ellipsis;
+    font-size: 32px;
 }
 
 .torrent-status > .stats {
-    top: 50%;
+    top: 70%;
+    position: relative;
+    padding: 10px;
+    line-height: 0px;
+    min-width: 40%;
+    max-width: 90%;
+    margin: 0px auto;
+
 }
 
 .torrent-status > .peers {
@@ -602,8 +613,9 @@ a:hover {
     perspective: 800px;
     -webkit-perspective: 800px;
 
-    pointer-events: none;
+    /* pointer-events: none; */
 }
+
 .flipbook.flip .dropArea{
 	/* When the container is hovered, flip the front side and hide it .. */
 	transform:rotateY(180deg);
