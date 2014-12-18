@@ -287,39 +287,12 @@ TorrenTV.prototype.download = function(torrent_file){
 
     // Download torrent
     self.torrent.downloadTorrent(torrent_file).then( function( video_stream_uri ){
+        /*
         self.emit('torrent:file:ready', video_stream_uri)
         self.emit('video:ready', video_stream_uri)
-    }).progress(function(torrent){
-
-        var swarm = torrent.swarm;
-        var wires = swarm.wires;
-        var bytes = n_utils.bytes;
-
-        var active_peers = _.filter(wires,function(wire){
-            return !wire.peerChoking;
-        });
-        var p = {peers:         [ active_peers.length, wires.length],
-                 name:          torrent.engine.torrent.name,
-                 sizeBytes:    _.reduce( 
-                            _.pluck( torrent.engine.files, 'length' ), function(a,b){
-                                    return a+b;
-                            }),
-                 size:    bytes( _.reduce( 
-                            _.pluck( torrent.engine.files, 'length' ), function(a,b){
-                                    return a+b;
-                            }) ),
-                 down:          bytes(swarm.downloaded),
-                 up:            bytes(swarm.uploaded),
-                 downSpeed:     bytes(swarm.downloadSpeed()) };
-
-        var ratio = swarm.downloaded/p.sizeBytes;
-        if(ratio > Settings.preload_buffer){
-            self.emit('torrent:file:preloaded', {torrent: torrent, progress: p})
-            return;
-        }
-
-       self.emit('torrent:file:progress', {torrent: torrent, progress: p})
-
+        */
+    }).progress(function (args) {
+        self.emit('torrent:file:progress', args)
     }).catch(function(err){
         console.error("Oops, some error occured while downloading torrent!", err);
     }).done()
@@ -328,6 +301,7 @@ TorrenTV.prototype.download = function(torrent_file){
     self.torrent.on('discovered-files',function(tor_files){
 
         self.emit('torrent:file:metadata', tor_files)
+
         // Here we can filter what files should be played, show to user, etc
 
         // or just download everything!
@@ -417,7 +391,7 @@ window.addEventListener("load", function() {
         $('body').css({opacity: 1});
         win.focus();
     });
-    gui.App.on('open', function (cmdline) {
+    gui.App.on(['open','reopen'], function (cmdline) {
         var last_arg = cmdline.split(' ').pop() 
         if(n_utils.isValidFile(last_arg))
             global.app.loadFile( cmdline );

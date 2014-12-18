@@ -11,6 +11,19 @@
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Movie Files</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>mp4</string>
+				<string>mov</string>
+			</array>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+		</dict>
+		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>torrent</string>
@@ -29,20 +42,6 @@
 			</array>
 		</dict>
 		<dict>
-			<key>CFBundleTypeIconFile</key>
-			<string>nw.icns</string>
-			<key>CFBundleTypeName</key>
-			<string>node-webkit App</string>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
-			<key>LSHandlerRank</key>
-			<string>Owner</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>com.intel.nw.app</string>
-			</array>
-		</dict>
-		<dict>
 			<key>CFBundleTypeName</key>
 			<string>Folder</string>
 			<key>CFBundleTypeOSTypes</key>
@@ -53,6 +52,17 @@
 			<string>Viewer</string>
 			<key>LSHandlerRank</key>
 			<string>None</string>
+		</dict>
+		<dict>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>All Files</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>

@@ -232,7 +232,7 @@ a:hover {
 }
 
 .dropArea.drag-hover {
-    border: 10px double rgba(255, 255, 255, 0.75);
+    border: 10px solid rgba(255, 255, 255, 0.75);
 
     -webkit-filter: grayscale(0) saturate(1.5);
 

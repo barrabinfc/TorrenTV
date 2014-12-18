@@ -98,14 +98,16 @@ PlayerDevices.prototype.startDeviceScan = function(){
     var self = this;
 
     self.devices = {}
-    console.assert(self.services === {}, 'startDeviceScan: no players available. Did you disable all players?')
+    console.assert(self.services !== {}, 'startDeviceScan: no players available. Did you disable all players?')
 
-    console.info(self.services);
     for(var serv_name in self.services){
         var service = self.services[serv_name]
+        console.log("Service start:", service)
 
         try {
-            service.start();
+            if(_.has(service, 'start'))
+                service.start();
+
         } catch(err){
             console.log('startDeviceScan: failed device scanning for ',serv_name);
             console.error(err)
@@ -130,9 +132,15 @@ PlayerDevices.prototype.stopDeviceScan = function(){
     self.discovering = false;
     for(var serv_name in self.services){
         var service = self.services[serv_name];
-        service.stop();
+        try {
+            service.stop();
+        } catch(err){
+            console.log('stopDeviceScan: failed device stop for', serv_name);
+            console.error(err)
+            continue;
+        }
 
-        delete self.service;
+        //delete self.service;
     }
 }
 

@@ -6,11 +6,14 @@ var qs      = require('querystring');
 var peerflix    = require('peerflix')
 var Q       = require('q');
 var util    = require('util')
+var _ = require('underscore');
 
 var http = require('http');
 var fs = require('fs');
 
 var events = require('events');
+var n_utils = require('./utils')
+var bytes = n_utils.bytes;
 
 /*
  * Create a new instance...
@@ -68,6 +71,7 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
     console.assert(self.engine == null, "A torrent is already downloadiiiing, bitch!");
 
     var engine = peerflix(torrent_file, {})
+    self.loading = true;
     self.engine = engine;
 
     self.hotswaps = 0;
@@ -79,12 +83,12 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
     var wires = self.wires;
     var swarm = self.swarm;
 
-    self.active = function(wire) {
+    var isActive = function(wire) {
         return !wire.peerChoking;
     };
 
     // peerflix started serving the File!
-    engine.server.on('listening', function() {
+    self.engine.server.on('listening', function() {
         var href = 'http://'+ address() + ':' + engine.server.address().port + '/';
         var filename = engine.server.index.name.split('/').pop().replace(/\{|\}/g, '');
         var filelength = engine.server.index.length;
@@ -92,11 +96,42 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
         // Yepa, we have a stream on this address
         console.log('Torrent-Streaming file is listening at address: ', href)
         Settings.address = href;
+
         self.loading = false;
+        //clearInterval(self.update_timer)
 
         // Updating is based on setInterval
         defer.resolve(href)
     });
+
+    // Progress
+    self.update_timer = setInterval( function(){
+        if(self.loading)
+            return
+
+        var p = {peers:         [ _.filter(self.wires, isActive).length, self.wires.length],
+                 name:          self.engine.torrent.name,
+                 sizeBytes:    _.reduce( 
+                            _.pluck( self.engine.files, 'length' ), function(a,b){
+                                    return a+b;
+                            }),
+                 size:    bytes( _.reduce( 
+                            _.pluck( self.engine.files, 'length' ), function(a,b){
+                                    return a+b;
+                            }) ),
+                 down:          bytes(self.swarm.downloaded),
+                 up:            bytes(self.swarm.uploaded),
+                 downSpeed:     bytes(self.swarm.downloadSpeed()) };
+
+        var ratio = self.swarm.downloaded/p.sizeBytes;
+        if(ratio > Settings.preload_buffer){
+            self.emit('torrent:file:preloaded', {torrent: torrent, progress: p})
+            return;
+        }
+
+        self.emit('torrent:file:progress', {torrent: torrent, progress: p})
+        defer.notify( {torrent: torrent, progress: p});
+    }, 1000.0/Settings.TORRENT_WATCHING_TIMER );
 
 
     engine.server.once('error', function(e){
@@ -129,11 +164,8 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
      *
      */
     var onReady = function() {
+        self.loading = false;
         self.emit('discovered-files', engine.files)
-
-        self.update_timer = setInterval( function(){
-            defer.notify( self );
-        }, 1000.0/Settings.TORRENT_WATCHING_TIMER );
     };
     if(engine.torrent) onReady;
     engine.on('ready', onReady);
