@@ -58,6 +58,8 @@ Torrents.prototype.init = function(options){
 }
 
 Torrents.prototype.cleanCache = function(cb){
+    console.log("Cleaning torrents...")
+
     // clean
     cb();
 }
@@ -98,7 +100,6 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
         Settings.address = href;
 
         self.loading = false;
-        //clearInterval(self.update_timer)
 
         // Updating is based on setInterval
         defer.resolve(href)
@@ -123,10 +124,9 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
                  up:            bytes(self.swarm.uploaded),
                  downSpeed:     bytes(self.swarm.downloadSpeed()) };
 
-        var ratio = self.swarm.downloaded/p.sizeBytes;
-        if(ratio > Settings.preload_buffer){
-            self.emit('torrent:file:preloaded', {torrent: torrent, progress: p})
-            return;
+        p.ratio = self.swarm.downloaded/p.sizeBytes;
+        if(p.ratio > Settings.preload_buffer){
+            self.emit('torrent:file:buffered', Settings.address );
         }
 
         self.emit('torrent:file:progress', {torrent: torrent, progress: p})
@@ -134,7 +134,7 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
     }, 1000.0/Settings.TORRENT_WATCHING_TIMER );
 
 
-    engine.server.once('error', function(e){
+    self.engine.server.once('error', function(e){
         self.loading = false;
         console.error("Error on torrent engine: ",e)
         defer.reject(new Error(e))
@@ -143,17 +143,17 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
         //engine.server.listen(0, address())
     })
 
-    engine.on('verify', function() {
+    self.engine.on('verify', function() {
         self.verified++;
         engine.swarm.piecesGot += 1;
     });
 
-    engine.on('invalid-piece', function() {
+    self.engine.on('invalid-piece', function() {
         //console.log('invalidpiece')
         self.invalid++;
     });
 
-    engine.on('hotswap', function() {
+    self.engine.on('hotswap', function() {
         self.hotswaps++;
     });
     self.swarm.on('wire', function(){
@@ -165,10 +165,10 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
      */
     var onReady = function() {
         self.loading = false;
-        self.emit('discovered-files', engine.files)
+        self.emit('discovered-files', self.engine.files)
     };
-    if(engine.torrent) onReady;
-    engine.on('ready', onReady);
+    if(self.engine.torrent) onReady;
+    self.engine.on('ready', onReady);
 
     return defer.promise;
 }

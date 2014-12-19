@@ -102,11 +102,11 @@ PlayerDevices.prototype.startDeviceScan = function(){
 
     for(var serv_name in self.services){
         var service = self.services[serv_name]
-        console.log("Service start:", service)
-
         try {
-            if(_.has(service, 'start'))
+            if(_.isFunction(service['start'])){
+                console.log("Service start (" + serv_name + "):", service)
                 service.start();
+            }
 
         } catch(err){
             console.log('startDeviceScan: failed device scanning for ',serv_name);

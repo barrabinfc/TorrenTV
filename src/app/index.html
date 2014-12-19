@@ -10,8 +10,8 @@
       <script src="Settings.js"></script>
       <script src="app.js"></script>
   </head>
-  <body class="animate-2x">
-  <div class="flipbook">          <!-- add class .flip to turn it -->
+  <body class="animate-2h torrent-ready">
+  <div class="flipbook flip">          <!-- add class .flip to turn it -->
         <div class="dropArea animate empty">
             <div class="bg"></div>
 
@@ -22,11 +22,12 @@
                 <a class="load-icon fa fa-magnet fa-3"></a>
             </div>
 
-            <div class="torrent-status">
-                <div class="filename"></div>
-                <div class="peers">Connected with <b class="peers">0/24</b> brothers!</div>
-                <div class="stats"><b class="sofar">249kb</b> of <b class="size">XXXYYGB</b> - <b class="speed">300kb/s</b></div>
+            <div class="torrent-status animate">
+                <div class='msg animate'>Loading from <b class="peers"></b> peers!</div>
+                <a class="filename" title=""></a>
+                <div class="stats"><b class="sofar">249kb</b> of <b class="size"></b></div>
             </div>
+            <div class="downloadProgress animate"></div>
 
             <!-- General info message -->
             <a href="#" class="info-message animate-4h">
@@ -39,16 +40,16 @@
         <div class="deviceDiscovery animate">
             <div class="bg"></div>
 
-            <div class="label">Select a device</div>
-
-            <div class="deviceList"></div>
-
             <!-- Loading/Discovery animation -->
             <div class="refreshDeviceScan loading">
                 <div class="circleIcon animate"></div>
                 <div class="circleIcon animate"></div>
                 <a class="load-icon fa fa-wifi fa-3"></a>
             </div>
+
+            <div class="label">Select a player</div>
+
+            <div class="deviceList"></div>
 
         </div>
 

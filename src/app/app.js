@@ -24,8 +24,7 @@ global.navigator = window.navigator;
 global.$ = global.jQuery = $;
 
 var n_utils = require('./utils');
-var rivets = require('rivets');
-
+var ProgressBar  = require('progressbar.js');
 
 var DropArea = require('./drop_area').DropArea;
 var BitTorrent = require('./torrents');
@@ -100,6 +99,7 @@ TorrenTV.prototype.init = function(options){
     self.torrent = null;
     self.drop_area = null;
     self.devices = null;
+    self.loading_progress = null;
 
     self.config = options;
 
@@ -131,7 +131,7 @@ TorrenTV.prototype.init = function(options){
             var tray = new gui.Tray({ icon: 'src/app/media/images/icons/icon-app-mini@2x.png' });
             var menu = new gui.Menu()
             menu.append(new gui.MenuItem({label: 'Open magnet/torrent', click: self.loadFile, key: 'o', 'modifiers': 'cmd'}));
-            menu.append(new gui.MenuItem({type: 'checkbox', label: 'Seed forever', checked: true}));
+            menu.append(new gui.MenuItem({type: 'checkbox', label: 'Autoplay', checked: true}));
             menu.append(new gui.MenuItem({type: 'separator'}))
             menu.append(new gui.MenuItem({label: 'Quit', click: self.exit}))
             tray.menu = menu;
@@ -178,47 +178,27 @@ TorrenTV.prototype.init = function(options){
         // Once dropped a File on our App start downloading
         self.drop_area.on('drop',    function(file){
             $('.flipbook').removeClass('flip')
-            $('body').addClass('downloading')
 
             if(n_utils.isMagnet(file) || n_utils.isTorrent(file) || n_utils.isHttpResource(file)) self.download(file)
             else                                                                                  self.serveFile(file)
         })
 
-        self.on('torrent:file:metadata',     function(metadata) {
-            // i can choose the filesss to play. 
-            // But i'm not in the mood
-            return;
-        });
-        self.on('torrent:file:progress',  function(data){
-            var torrent = data.torrent, 
-                p =       data.progress;
-
-            //var f_name = torrent.engine.files.name;
-
-            $('.filename').text( p.name );
-            $('.sofar').text( p.down );
-            $('.peers').text( p.peers.join('/') );
-            $('.speed').text( p.downSpeed );
-            $('.size').text( p.size );
-        });
-
         // Video ready to play, bitches
         self.on('video:ready', function(file){
-
             self.devices.startDeviceScan();
 
             /* Change to device view */
             _.delay(function(){
                 $('.flipbook').addClass('flip');
-                self.play( file )
-            }, 3000 );
+                //self.play( file )
+            }, 1000 );
 
-        } );
+        });
 
         /* New device detected */
         self.devices.on('deviceOn',  function(device, address){
-            var item = $('<a class="device ' + device.name + '" id="' + device.name + '">' +
-                            '<i class="fa micon fa-play-circle"></i>' + 
+            var item = $('<a class="device ' + device.name + '" title="Play in ' + device.name + '" id="' + device.name + '">' +
+                            '<i class="fa micon fa-play-circle ' + device.name +'-icon"></i>' + 
                             '<h4>' + address + '</h4>' + 
                         '</a>');
             item.appendTo('.deviceList');
@@ -252,7 +232,8 @@ TorrenTV.prototype.init = function(options){
 
     // Start s
     if( Settings.device_discovery_on_startup){
-        //self.devices.startDeviceScan()
+        console.log('device_discovery_on_startup');
+        self.devices.startDeviceScan()
     }
 
     // there's already a torrent/magnet? Oh boy, start
@@ -287,28 +268,58 @@ TorrenTV.prototype.download = function(torrent_file){
 
     // Download torrent
     self.torrent.downloadTorrent(torrent_file).then( function( video_stream_uri ){
-        /*
-        self.emit('torrent:file:ready', video_stream_uri)
-        self.emit('video:ready', video_stream_uri)
-        */
+        // This emits when Stream is first opened
+        $('body').removeClass('torrent-loading').addClass('torrent-ready')
+
+        //self.emit('torrent:file:ready', video_stream_uri)
+        //self.emit('video:ready', video_stream_uri)
+        return;
     }).progress(function (args) {
         self.emit('torrent:file:progress', args)
     }).catch(function(err){
         console.error("Oops, some error occured while downloading torrent!", err);
     }).done()
 
-    //  Select every file to download
+    // When you are conected to a swarm
     self.torrent.on('discovered-files',function(tor_files){
 
-        self.emit('torrent:file:metadata', tor_files)
-
         // Here we can filter what files should be played, show to user, etc
+        self.emit('torrent:file:metadata', tor_files);
 
         // or just download everything!
         tor_files.forEach( function(file,i,files){
             console.info( file.name );
             file.select()
         });
+    });
+
+    self.torrent.on('torrent:file:progress', function (data) {
+            var torrent = data.torrent, 
+                p =       data.progress;
+
+            self.loading_progress.animate(p.ratio);
+            win.setBadgeLabel( p.downSpeed );
+
+            $('.filename').text( p.name );
+            $('.sofar').text( p.down );
+            $('.peers').text( p.peers.join('/') );
+            //$('.speed').text( p.downSpeed );
+            $('.size').text( p.size );
+    });
+    self.torrent.on('torrent:file:buffered', function(video_stream_uri){
+        console.log("Wehhaaa, video buffered");
+        self.emit('torrent:file:ready', video_stream_uri);
+        self.emit('video:ready', video_stream_uri);
+    });
+
+    // Progress bar
+    self.loading_progress = new ProgressBar.Circle( $('.downloadProgress').get(0), {
+        duration: 300,
+        color:      '#6FD57F',
+        trailColor: 'rgba(0,0,0,0.75)',
+        trailWidth: 5,
+        easing: 'easeInOut',
+        strokeWidth: 5
     });
 }
 
@@ -391,7 +402,7 @@ window.addEventListener("load", function() {
         $('body').css({opacity: 1});
         win.focus();
     });
-    gui.App.on(['open','reopen'], function (cmdline) {
+    gui.App.on('open', function (cmdline) {
         var last_arg = cmdline.split(' ').pop() 
         if(n_utils.isValidFile(last_arg))
             global.app.loadFile( cmdline );

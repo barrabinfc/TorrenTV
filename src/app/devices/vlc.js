@@ -47,21 +47,25 @@ var getVlcPath = function(){
 /*
  *  Launch VLC on test mode, to see if it's installed correctly.
  */
-var VLC_TEST_ARGS = '--version --play-and-exit'
+var VLC_TEST_ARGS = ' --version --play-and-exit'
 var launchTest = function(args){
     var app_path  = getVlcPath();
     var child;
     var defered = Q.defer();
     var home = (process.env.HOME || '') 
 
-    child = proc.exec( '"' + app_path  + VLC_TEST_ARGS + ' || ' +
-                       'vlc'     + VLC_TEST_ARGS + ' || ' + 
-                        home + app_path + VLC_TEST_ARGS + '"',
-                        {timeout: 100}, function(error,stdout,stderr){
-        if(error !== null)
-            defered.reject(new Error(("Vlc is not installed...",error)))
-        else defered.resolve(true)
-    });
+    try {
+        child = proc.exec( app_path  + VLC_TEST_ARGS + ' || ' +
+                           'vlc'     + VLC_TEST_ARGS + ' || ' + 
+                           home + app_path + VLC_TEST_ARGS ,
+                            {timeout: 100}, function(error,stdout,stderr){
+            if(error !== null)
+                defered.reject(new Error(("Vlc is not installed...",error)))
+            else defered.resolve(true)
+        });
+    } catch( err ){
+        defered.reject(new Error(("launchTest: failed...",error)))
+    }
 
     return defered.promise;
 }
@@ -147,7 +151,10 @@ VlcDevice.prototype.is_installed = function(){
 
     // Run with exit 0, to see if application is found.
     launchTest().then(function(is_installed){
+        console.log('VLC: ', is_installed);
         defered.resolve( is_installed )
+    }).catch(function(error){
+        defered.reject(new Error(("Vlc is not installed...",error)))
     }).done();
 
     return defered.promise;

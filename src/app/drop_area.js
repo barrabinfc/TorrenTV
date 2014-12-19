@@ -144,7 +144,7 @@ DropArea.prototype.handleFile = function( file ){
         return;
     }
 
-    $(self.el).addClass('has-file');
+    $(self.el).removeClass('empty').addClass('has-file');
 
     self.history.push(file)
 };
