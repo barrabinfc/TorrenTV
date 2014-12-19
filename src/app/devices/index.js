@@ -88,9 +88,19 @@ PlayerDevices.prototype.forceClean = function(){
 
     self.stopDeviceScan();
 
-    self.services = {};
-    self.devices = {};
-    self.default_device = null;
+    self.discovering = false;
+    self.playing     = false;
+    self._services = { 'roku':        require('./roku').Device,
+                        'vlc':        require('./vlc').Device,
+                        'xbmc':       require('airplay-xbmc').createBrowser,
+                        'chromecast': require('chromecast-js').Browser,
+                        'airplay':    require('airplay-js').createBrowser  };
+
+    // Active services and devices
+    self.services = {}
+    self.devices = {}
+
+    self.default_device = undefined;
 }
 
 
@@ -140,7 +150,7 @@ PlayerDevices.prototype.stopDeviceScan = function(){
             continue;
         }
 
-        //delete self.service;
+        delete self.service;
     }
 }
 
@@ -169,6 +179,7 @@ PlayerDevices.prototype.detectedDevice = function(device, server_name){
             self.default_device = device;
 
         // for gui
+        //self.emit('deviceOn', device, device_uri);
         self.emit('deviceOn', device, device_uri);
     }
 }

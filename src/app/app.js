@@ -197,7 +197,7 @@ TorrenTV.prototype.init = function(options){
 
         /* New device detected */
         self.devices.on('deviceOn',  function(device, address){
-            var item = $('<a class="device ' + device.name + '" title="Play in ' + device.name + '" id="' + device.name + '">' +
+            var item = $('<a class="device animate ' + device.name + '" title="Play in ' + device.name + '" id="' + device.name + '">' +
                             '<i class="fa micon fa-play-circle ' + device.name +'-icon"></i>' + 
                             '<h4>' + address + '</h4>' + 
                         '</a>');
@@ -206,11 +206,13 @@ TorrenTV.prototype.init = function(options){
             // Put in circular motion
             var devices = $('.deviceList .device');
             for(var i = 0, l = devices.length+1; i < l; i++) {
+                /*
                 var pos_x  = (24   + 40   * Math.cos( Math.PI - 2*(1/l)*i*Math.PI)),
                     pos_y  = (52.5 + 40   * Math.sin( Math.PI - 2*(1/l)*i*Math.PI));
+                    */
 
-                //var pos_x  = (24 + 45   * Math.cos(0.5 * Math.PI - 2*(1/l)*i*Math.PI)),
-                //    pos_y  = (52.5 + 45 * Math.sin(0.5 * Math.PI - 2*(1/l)*i*Math.PI));
+                var pos_x  = (50 + (35* -1*Math.cos( (1/l)*(i+1)*Math.PI))),
+                    pos_y  = (50 + (35* Math.sin(    (1/l)*(i+1)*Math.PI)));
 
                 $(devices[i]).addClass( (pos_y > 50 ? 'labelOnTop' : 'labelOnBottom') );
                 $(devices[i]).css({opacity: 1.0, left: pos_x.toFixed(4)+'%', top: pos_y.toFixed(4) + '%'});
@@ -220,6 +222,15 @@ TorrenTV.prototype.init = function(options){
             console.log('deviceOff ', device.name)
             $('#'+device.name).remove();
         }); 
+
+
+        $('.refreshDeviceScan').on('click', function () {
+            $('.deviceList').html('');
+            self.devices.forceClean();
+
+            self.devices.setup_services();
+            self.devices.startDeviceScan();
+        });
     }
 
     clean();
