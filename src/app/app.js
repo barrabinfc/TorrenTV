@@ -131,7 +131,9 @@ TorrenTV.prototype.init = function(options){
             var tray = new gui.Tray({ icon: 'src/app/media/images/icons/icon-app-mini@2x.png' });
             var menu = new gui.Menu()
             menu.append(new gui.MenuItem({label: 'Open magnet/torrent', click: self.loadFile, key: 'o', 'modifiers': 'cmd'}));
-            menu.append(new gui.MenuItem({type: 'checkbox', label: 'Autoplay', checked: true}));
+            menu.append(new gui.MenuItem({type: 'checkbox', label: 'Autoplay', checked: Settings.auto_play, 'click': function(){
+                Settings.auto_play = !Settings.auto_play;
+            }}));
             menu.append(new gui.MenuItem({type: 'separator'}))
             menu.append(new gui.MenuItem({label: 'Quit', click: self.exit}))
             tray.menu = menu;
@@ -188,19 +190,20 @@ TorrenTV.prototype.init = function(options){
             self.devices.startDeviceScan();
 
             /* Change to device view */
-            _.delay(function(){
-                $('.flipbook').addClass('flip');
-                //self.play( file )
-            }, 1000 );
+            $('.flipbook').addClass('flip');
+            if(Settings.auto_play){
+                self.devices.play(Settings.address);
+            }
 
         });
 
         /* New device detected */
-        self.devices.on('deviceOn',  function(device, address){
+        self.devices.on('deviceOn',  function(device, device_uri){
             var item = $('<a class="device animate ' + device.name + '" title="Play in ' + device.name + '" id="' + device.name + '">' +
                             '<i class="fa micon fa-play-circle ' + device.name +'-icon"></i>' + 
-                            '<h4>' + address + '</h4>' + 
+                            '<h4>' + device_uri + '</h4>' + 
                         '</a>');
+            item.data('device_uri', device_uri);
             item.appendTo('.deviceList');
 
             // Put in circular motion
@@ -218,7 +221,7 @@ TorrenTV.prototype.init = function(options){
                 $(devices[i]).css({opacity: 1.0, left: pos_x.toFixed(4)+'%', top: pos_y.toFixed(4) + '%'});
             }
         });
-        self.devices.on('deviceOff', function(device, address) { 
+        self.devices.on('deviceOff', function(device, device_uri) { 
             console.log('deviceOff ', device.name)
             $('#'+device.name).remove();
         }); 
@@ -230,6 +233,12 @@ TorrenTV.prototype.init = function(options){
 
             self.devices.setup_services();
             self.devices.startDeviceScan();
+        });
+        $(document).on('click', '.device', function(e){
+            var el = $(e.target).parent();
+            var dev_uri = $(el).data('device_uri');
+
+            self.devices.play(Settings.address, dev_uri)
         });
     }
 
@@ -314,7 +323,6 @@ TorrenTV.prototype.download = function(torrent_file){
             $('.filename').text( p.name );
             $('.sofar').text( p.down );
             $('.peers').text( p.peers.join('/') );
-            //$('.speed').text( p.downSpeed );
             $('.size').text( p.size );
     });
     self.torrent.on('torrent:file:buffered', function(video_stream_uri){
@@ -362,7 +370,7 @@ TorrenTV.prototype.serveFile = function(file){
 /*
  * We just need to inform the player where the video stream is
  */
-TorrenTV.prototype.play = function( video_stream_uri, device ){
+TorrenTV.prototype.play = function( video_stream_uri, device_uri ){
     try {
         //this.devices.play(video_stream_uri, device)
         device.play(video_stream_uri);
@@ -401,10 +409,7 @@ var last_arg = gui.App.argv.pop();
 
 // Slavoj Žižek: The Reality of the Virtual ...
 // var last_arg = 'magnet:?xt=urn:btih:97FCEEF8CC2228FEE253FE51A8E3D8C0C2438457&dn=slavoj+zizek+the+reality+of+the+virtual+2004+dvdrip+480p+h264&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.com%3A1337';
-
-
-var is_torrent = (last_arg && (last_arg.substring(0, 8) === 'magnet:?' || last_arg.substring(0, 7) === 'http://' || last_arg.endsWith('.torrent')))
-
+//
 var app_config = {'start_torrent': (n_utils.isValidFile(last_arg) ? last_arg : undefined)};
 
 window.addEventListener("load", function() {

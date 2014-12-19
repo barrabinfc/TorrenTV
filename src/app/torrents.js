@@ -125,7 +125,7 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
                  downSpeed:     bytes(self.swarm.downloadSpeed()) };
 
         p.ratio = self.swarm.downloaded/p.sizeBytes;
-        if(p.ratio > Settings.preload_buffer){
+        if(p.ratio > Settings.PRELOAD_BUFFER){
             self.emit('torrent:file:buffered', Settings.address );
         }
 

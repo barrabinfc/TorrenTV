@@ -162,16 +162,14 @@ VlcDevice.prototype.is_installed = function(){
 
 
 
-VlcDevice.prototype.play = function(resource, n, callback ){
+VlcDevice.prototype.play = function(resource, callback ){
     var self = this;
 
     console.log("Called play of VLC", resource)
-    if(n)
-        self.options['currentTime'] = n
 
     launchApp( resource  ).then( function(err, status){
         self.playing = true;
-        self.timePosition = self.options['currentTime']
+        //self.timePosition = self.options['currentTime']
         self.startedTime = process.hrtime()[0];
         self.emit('connected');
 

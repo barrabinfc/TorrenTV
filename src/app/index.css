@@ -368,6 +368,7 @@ a:hover {
 .torrent-ready .torrent-status .msg {
     opacity: 1;
     transform: scale(1.0);
+    visibility: visible;
 }
 
 
@@ -433,7 +434,7 @@ a:hover {
     position: absolute;
     pointer-events: auto;
 
-    left: calc(50% - 64px);
+    left: calc(50%);
     top: calc(50%);
     opacity: 0;
 
@@ -512,7 +513,7 @@ a:hover {
 
 
 .device-icon {
-   content:url("./media/images/AirplaySmall.png");
+   content:url("./media/images/AirplayIconSmall.png");
 }
 
 .device-icon.off {
@@ -520,7 +521,7 @@ a:hover {
 }
 
 .airplay-icon {
-   content:url("./media/images/AirplaySmall.png");
+   content:url("./media/images/AirplayIconSmall.png");
 }
 
 .airplay-icon.off {
@@ -544,7 +545,7 @@ a:hover {
 }
 
 .xbmc-icon {
-   content:url("./media/images/AirplaySmall.png");
+   content:url("./media/images/AirplayIconSmall.png");
 }
 
 .xbmc-icon.off {

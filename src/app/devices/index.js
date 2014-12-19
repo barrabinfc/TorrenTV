@@ -36,12 +36,19 @@ PlayerDevices.prototype.init = function(options){
     self.default_device = undefined;
 }
 
-PlayerDevices.prototype.play = function(video_address, device){
-    if(!device)
-        this.default_device.play(video_address, device );
+PlayerDevices.prototype.play = function(video_address, device_uri){
+    var self = this;
+    if(!device){
+        self.default_device.play(video_address, device );
+    } else { 
 
-    //_.invoke( self.devices, 'play', video_address , device)
+        if( _.isFunction(self.devices[device_uri].play) )
+            self.devices[device_uri].play(video_address)
+
+    }
+    self.playing = true;
 }
+
 PlayerDevices.prototype.stop = function(){
     return;
 }

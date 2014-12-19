@@ -14,13 +14,14 @@ Settings.DISCOVERY_TIMEOUT = 7000;
 Settings.DISCOVERY_STATUS  = 'running';
 
 // Load video when 5% is already loaded
-Settings.PRELOAD_RATIO = 0.05;
+Settings.PRELOAD_BUFFER = 0.02;
 
 // 5fps torrent stats 
 Settings.TORRENT_WATCHING_TIMER = 5; 
 
 Settings.auto_update = true;
 Settings.remove_downloads_on_exit = true;
+Settings.auto_play = true;
 
 Settings.device_discovery_on_startup = true;
 
@@ -59,7 +60,6 @@ Settings.window = {
 var loadSettings = function(){
     var sett = JSON.parse(localStorage.settings || 'null');
     var _s = _.extend( Settings, sett )
-    console.info(_s)
     return _s
 }
 
