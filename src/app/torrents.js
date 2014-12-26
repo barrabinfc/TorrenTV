@@ -59,6 +59,7 @@ Torrents.prototype.init = function(options){
 
 Torrents.prototype.cleanCache = function(cb){
     console.log("Cleaning torrents...")
+    console.log("UNINPLEMENTED");
 
     // clean
     cb();
@@ -72,13 +73,14 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
 
     console.assert(self.engine == null, "A torrent is already downloadiiiing, bitch!");
 
-    var engine = peerflix(torrent_file, {})
+    var engine = peerflix(torrent_file, {path: Settings.torrent_path})
     self.loading = true;
     self.engine = engine;
 
     self.hotswaps = 0;
     self.verified = 0;
     self.invalid = 0;
+    self.buffered = false;
 
     self.wires = engine.swarm.wires;
     self.swarm = engine.swarm;
@@ -88,6 +90,10 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
     var isActive = function(wire) {
         return !wire.peerChoking;
     };
+
+    self.engine.on('download', function (piece_index) {
+        console.log("Downloaded piece_index: ", piece_index);
+    })
 
     // peerflix started serving the File!
     self.engine.server.on('listening', function() {
@@ -125,8 +131,10 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
                  downSpeed:     bytes(self.swarm.downloadSpeed()) };
 
         p.ratio = self.swarm.downloaded/p.sizeBytes;
-        if(p.ratio > Settings.PRELOAD_BUFFER){
+        if(p.ratio > Settings.PRELOAD_BUFFER &&
+           !self.buffered){
             self.emit('torrent:file:buffered', Settings.address );
+            self.buffered = true;
         }
 
         self.emit('torrent:file:progress', {torrent: torrent, progress: p})

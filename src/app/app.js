@@ -134,6 +134,9 @@ TorrenTV.prototype.init = function(options){
             menu.append(new gui.MenuItem({type: 'checkbox', label: 'Autoplay', checked: Settings.auto_play, 'click': function(){
                 Settings.auto_play = !Settings.auto_play;
             }}));
+            menu.append(new gui.MenuItem({label: 'Open Downloads folder', 'click': function(){
+                gui.Shell.showItemInFolder( Settings.torrent_path  );
+            }}));
             menu.append(new gui.MenuItem({type: 'separator'}))
             menu.append(new gui.MenuItem({label: 'Quit', click: self.exit}))
             tray.menu = menu;
@@ -226,6 +229,11 @@ TorrenTV.prototype.init = function(options){
             $('#'+device.name).remove();
         }); 
 
+        // Back to torrent view when playing
+        self.devices.on('playing', function(){
+            $('.flipbook').removeClass('flip');
+        });
+
 
         $('.refreshDeviceScan').on('click', function () {
             $('.deviceList').html('');
@@ -287,6 +295,7 @@ TorrenTV.prototype.download = function(torrent_file){
     var self = this;
 
     // Download torrent
+    $('body').addClass('torrent-loading');
     self.torrent.downloadTorrent(torrent_file).then( function( video_stream_uri ){
         // This emits when Stream is first opened
         $('body').removeClass('torrent-loading').addClass('torrent-ready')

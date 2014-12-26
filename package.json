@@ -49,6 +49,7 @@
     "srt2vtt2": "0.0.2",
     "state-machine": "0.0.3",
     "underscore": "^1.7.0",
+    "rideo.js": "^4.11.3",
     "windows-no-runnable": "~0.0.6",
     "zepto": "0.0.4"
   },

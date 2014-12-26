@@ -38,8 +38,9 @@ PlayerDevices.prototype.init = function(options){
 
 PlayerDevices.prototype.play = function(video_address, device_uri){
     var self = this;
-    if(!device){
-        self.default_device.play(video_address, device );
+
+    if(!device_uri && self.default_device ){
+        self.default_device.play(video_address);
     } else { 
 
         if( _.isFunction(self.devices[device_uri].play) )
@@ -47,6 +48,7 @@ PlayerDevices.prototype.play = function(video_address, device_uri){
 
     }
     self.playing = true;
+    self.emit('playing')
 }
 
 PlayerDevices.prototype.stop = function(){

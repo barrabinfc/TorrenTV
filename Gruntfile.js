@@ -24,7 +24,7 @@ module.exports = function(grunt) {
 	"use strict";
 
 	var buildPlatforms = parseBuildPlatforms(grunt.option('platforms'));
-	var currentVersion = grunt.file.readJSON('package.json').version;
+	var currentVersion = grunt.file.readJSON('./src/app/package.json').version;
 
 	require('load-grunt-tasks')(grunt);
 	grunt.loadNpmTasks('grunt-jsvalidate');
@@ -65,7 +65,7 @@ module.exports = function(grunt) {
 				embed_nw: true,
 				zip: false, // Zip nw for mac in windows. Prevent path too long if build all is used.
                 macCredits: './src/app/credits.html',
-                macPlist: 'Info.plist',
+                macPlist: './Info.plist',
 				mac_icns: './src/app/media/images/icons/MyIcon.icns', // Path to the Mac icon file
 				mac: buildPlatforms.mac,
 				win: buildPlatforms.win,
@@ -73,9 +73,9 @@ module.exports = function(grunt) {
 				linux64: buildPlatforms.linux64,
 			},
 			src: ['./src/**', '!./src/app/styl/**',
-				'./node_modules/**', '!./node_modules/bower/**', '!./node_modules/*grunt*/**', '!./node_modules/stylus/**',
+				  './node_modules/**', '!./node_modules/bower/**', '!./node_modules/*grunt*/**', '!./node_modules/stylus/**',
 				'!./**/test*/**', '!./**/doc*/**', '!./**/example*/**', '!./**/demo*/**', '!./**/bin/**', '!./**/build/**', '!./**/.*/**',
-				'./package.json', './README.md', './LICENSE.txt' ]
+				'./src/app/package.json', './README.md', './LICENSE.txt' ]
 		},
 
 		exec: {

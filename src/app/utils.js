@@ -1,10 +1,5 @@
 var numeral = require('numeral');
 
-var openInFinder = function(file){
-  var gui = require('nw.gui');
-  gui.Shell.showItemInFolder(file);
-}
-
 var download = function(url, dest, cb) {
   var file = fs.createWriteStream(dest);
   var request = http.get(url, function(response) {
@@ -62,6 +57,5 @@ exports.isValidFile = function(link){
 
 
 exports.download   = download;
-exports.openInFinder = openInFinder;
 
 

@@ -36,5 +36,4 @@ BuiltinDevice.prototype.play = function(resource, n, callback){
     var self = this;
 
     gui.Window.open('player.html', {position: 'center'});
-
 }

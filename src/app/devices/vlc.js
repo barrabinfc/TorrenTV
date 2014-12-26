@@ -173,7 +173,7 @@ VlcDevice.prototype.play = function(resource, callback ){
         self.startedTime = process.hrtime()[0];
         self.emit('connected');
 
-    }).done(callback);
+    }).done();
 }
 
 exports.Device = VlcDevice

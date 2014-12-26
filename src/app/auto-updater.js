@@ -8,8 +8,8 @@ var UpdaterService  = require('nw-updater');
 
 var checkUpdates = function(){
     var updater = new UpdaterService({'channel':'beta', 
-                                    "currentVersion": Settings.version,
-                                    'endpoint':'http://torrentv.github.io/update.json'})
+                                      "currentVersion": Settings.version,
+                                      'endpoint':'http://torrentv.github.io/update.json'})
     updater.update()
 
     updater.on("download", function(version){
