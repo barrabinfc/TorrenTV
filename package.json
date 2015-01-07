@@ -3,6 +3,7 @@
   "version": "0.9.9",
   "description": "Send torrent streaming directly to AppleTV/XBMC via Airplay",
   "main": "app://host/src/app/index.html",
+  "chromium-args": "--enable-threaded-compositing",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

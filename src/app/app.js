@@ -9,7 +9,7 @@ var fs = require('fs');
 
 //var subtitles_server = new (require("./subtitlesServer.js"))()
 var srt2vtt2 = require('srt2vtt2');
-var scfs = new (require("simple-cors-file-server"))();
+//var scfs = new (require("simple-cors-file-server"))();
 
 var path     = require("path");
 var execPath = path.dirname( process.execPath );
@@ -110,7 +110,7 @@ TorrenTV.prototype.init = function(options){
         if( Settings.DEBUG ){
             //win.showDevTools();
 
-            var crash_path = gui.App.dataPath + '/crashes/';
+            var crash_path = path.resolve( gui.App.dataPath + '/crashes' );
             if(!fs.existsSync(crash_path))
                 fs.mkdirSync(crash_path)
             gui.App.setCrashDumpDir( crash_path )
@@ -123,10 +123,11 @@ TorrenTV.prototype.init = function(options){
 
         // MenuBar
         var isMac = process.platform.indexOf('darwin')>-1;
+        var nativeMenuBar = new gui.Menu({type: "menubar"});
         if(isMac){
-            var nativeMenuBar = new gui.Menu({type: "menubar"});
             nativeMenuBar.createMacBuiltin('TorrenTV', {'hideEdit': false})
-            win.menu = nativeMenuBar;
+            
+        }
 
             var tray = new gui.Tray({ icon: 'src/app/media/images/icons/icon-app-mini@2x.png' });
             var menu = new gui.Menu()
@@ -135,12 +136,11 @@ TorrenTV.prototype.init = function(options){
                 Settings.auto_play = !Settings.auto_play;
             }}));
             menu.append(new gui.MenuItem({label: 'Open Downloads folder', 'click': function(){
-                gui.Shell.showItemInFolder( Settings.torrent_path  );
+                gui.Shell.showItemInFolder( path.resolve( Settings.torrent_path )  );
             }}));
             menu.append(new gui.MenuItem({type: 'separator'}))
             menu.append(new gui.MenuItem({label: 'Quit', click: self.exit}))
             tray.menu = menu;
-        }
 
         // Window Size/State
         win.moveTo( Settings.window.x, Settings.window.y );
@@ -425,6 +425,7 @@ var last_arg = gui.App.argv.pop();
 var app_config = {'start_torrent': (n_utils.isValidFile(last_arg) ? last_arg : undefined)};
 
 window.addEventListener("load", function() {
+    console.info(app_config);
     global.app  = new TorrenTV( app_config );
     global.app.on('app:ready', function () {
         $('body').css({opacity: 1});

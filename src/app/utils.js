@@ -51,8 +51,8 @@ exports.isHttpResource = function(link){
 }
 
 exports.isValidFile = function(link){
-    return (link && ( isMagnet(link)         || isTorrent(link) ||
-                      isAudioVideoFile(link) || isHttpResource(link) ) )
+    return (link && ( exports.isMagnet(link)         || exports.isTorrent(link) ||
+                      exports.isAudioVideoFile(link) || exports.isHttpResource(link) ) )
 }
 
 
