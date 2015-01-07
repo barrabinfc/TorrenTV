@@ -30,9 +30,9 @@ RequestExecutionLevel user
 
 ;Define UI settings
 !define MUI_LICENSEPAGE_BGCOLOR /GRAY
-!define MUI_UI_HEADERIMAGE_RIGHT "..\..\src\app\images\icon.png"
-!define MUI_ICON "..\..\src\app\images\favicon.ico"
-!define MUI_UNICON "..\..\src\app\images\favicon.ico"
+!define MUI_UI_HEADERIMAGE_RIGHT "..\..\src\app\media\images\icons\icon.png"
+!define MUI_ICON "..\..\src\app\media\images\icons\favicon.ico"
+!define MUI_UNICON "..\..\src\app\media\images\icons\favicon.ico"
 !define MUI_WELCOMEFINISHPAGE_BITMAP "installer-image.bmp"
 !define MUI_UNWELCOMEFINISHPAGE_BITMAP "uninstaller-image.bmp"
 !define MUI_ABORTWARNING
@@ -63,9 +63,9 @@ Section ; Node Webkit Files
 	SetOutPath "$INSTDIR\node-webkit"
 
 	;Add the files
-	File "..\..\build\cache\win\0.9.2\*.dll"
-	File "/oname=TorrenTV.exe" "..\..\build\cache\win\0.9.2\nw.exe"
-	File "..\..\build\cache\win\0.9.2\nw.pak"
+	File "..\..\build\cache\win\0.11.2\*.dll"
+	File "/oname=TorrenTV.exe" "..\..\build\cache\win\0.11.2\nw.exe"
+	File "..\..\build\cache\win\0.11.2\nw.pak"
 
 SectionEnd
 
@@ -93,17 +93,17 @@ Section ; Shortcuts
 	;Working Directory
 	SetOutPath "$INSTDIR"
     
-	CreateShortCut "$INSTDIR\TorrenTV.lnk" "$INSTDIR\node-webkit\TorrenTV.exe" "." "$INSTDIR\src\app\images\favicon.ico" "" "" "" "TorrenTV"
+	CreateShortCut "$INSTDIR\TorrenTV.lnk" "$INSTDIR\node-webkit\TorrenTV.exe" "." "$INSTDIR\src\app\media\images\icons\favicon.ico" "" "" "" "TorrenTV"
 
 	;Start Menu Shortcut
 	RMDir /r "$SMPROGRAMS\TorrenTV"
 	CreateDirectory "$SMPROGRAMS\TorrenTV"
-	CreateShortCut "$SMPROGRAMS\TorrenTV\TorrenTV.lnk" "$INSTDIR\node-webkit\TorrenTV.exe" "." "$INSTDIR\src\app\images\favicon.ico" "" "" "" "TorrenTV"
-	CreateShortCut "$SMPROGRAMS\TorrenTV\Uninstall.lnk" "$INSTDIR\Uninstall.exe" "" "$INSTDIR\src\app\images\favicon.ico" "" "" "" "Uninstall TorrenTV"
+	CreateShortCut "$SMPROGRAMS\TorrenTV\TorrenTV.lnk" "$INSTDIR\node-webkit\TorrenTV.exe" "." "$INSTDIR\src\app\media\images\icons\favicon.ico" "" "" "" "TorrenTV"
+	CreateShortCut "$SMPROGRAMS\TorrenTV\Uninstall.lnk" "$INSTDIR\Uninstall.exe" "" "$INSTDIR\src\app\media\images\icons\favicon.ico" "" "" "" "Uninstall TorrenTV"
 
 	;Desktop Shortcut
 	Delete "$DESKTOP\TorrenTV.lnk"
-	CreateShortCut "$DESKTOP\TorrenTV.lnk" "$INSTDIR\node-webkit\TorrenTV.exe" "." "$INSTDIR\src\app\images\favicon.ico" "" "" "" "TorrenTV"
+	CreateShortCut "$DESKTOP\TorrenTV.lnk" "$INSTDIR\node-webkit\TorrenTV.exe" "." "$INSTDIR\src\app\media\images\icons\favicon.ico" "" "" "" "TorrenTV"
 
 SectionEnd
 

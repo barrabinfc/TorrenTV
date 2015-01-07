@@ -70,13 +70,6 @@ DropArea.prototype.init = function(options){
 
 
 
-    /*
-     * Ok!
-     *
-     * If .torrent or magnet link is dropped, emmit signal 'torrent-download'
-     * Otherwise, if is a video file or a HTTP URL, emit signal 'play'
-     *
-     */
     doc.on('drop', function (event) {
 
         (event.preventDefault && event.preventDefault());
@@ -101,6 +94,7 @@ DropArea.prototype.init = function(options){
 }
 
 
+// Show file dialog  selection
 DropArea.prototype.openFileDialog = function(){
     var self  = this;
     n_utils.chooseFile( function(file) {
@@ -118,7 +112,6 @@ DropArea.prototype.openFileDialog = function(){
  * Performs mimetype/check if is a torrent/magnet, 
  * video , etc.
  *
- * Launch the appropriate downloaders via signals
  */
 DropArea.prototype.handleFile = function( file ){
     var self = this;
@@ -132,6 +125,9 @@ DropArea.prototype.handleFile = function( file ){
     } else {
         console.error("Unknow file dropped: ", file );
 
+        // BUG: default_label is the previous message, not
+        // necessarly is correct. We should put a error message, and
+        // force state to be back to `wait-for-filedrop`.
         var default_label = $('.info-message').html();
         $('.info-message').html('Not a magnet/torrent!');
 

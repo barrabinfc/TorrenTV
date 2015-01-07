@@ -13,6 +13,8 @@ var parseBuildPlatforms = function(argumentPlatform) {
 	var buildPlatforms = {
 		mac: /mac/.test(inputPlatforms) || buildAll,
 		win: /win/.test(inputPlatforms) || buildAll,
+        win32: /win32/.test(inputPlatforms) || buildAll,
+        win64: /win64/.test(inputPlatforms) || buildAll,
 		linux32: /linux32/.test(inputPlatforms) || buildAll,
 		linux64: /linux64/.test(inputPlatforms) || buildAll
 	};
@@ -43,9 +45,11 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('start', function(){
 		var start = parseBuildPlatforms();
-		if(start.win){
-			grunt.task.run('exec:win');
-		}else if(start.mac){
+		if(start.win32){
+			grunt.task.run('exec:win32');
+        }else if(start.win64){
+			grunt.task.run('exec:win64');
+        }else if(start.mac){
 			grunt.task.run('exec:mac');
 		}else if(start.linux32){
 			grunt.task.run('exec:linux32');
@@ -60,13 +64,15 @@ module.exports = function(grunt) {
 		nodewebkit: {
 			options: {
 				version: '0.11.2',
-				build_dir: './build', // Where the build version of my node-webkit app is saved
-				keep_nw: true,
+				buildDir: './build', // Where the build version of my node-webkit app is saved
+                buildType: 'versioned',
+				cacheDir: './build/cache',
 				embed_nw: true,
 				zip: false, // Zip nw for mac in windows. Prevent path too long if build all is used.
                 macCredits: './src/app/credits.html',
                 macPlist: './Info.plist',
-				mac_icns: './src/app/media/images/icons/MyIcon.icns', // Path to the Mac icon file
+				macIcns: './src/app/media/images/icons/MyIcon.icns', // Path to the Mac icon file
+                //winIco: './src/app/media/images/icons/favicon.ico',
 				mac: buildPlatforms.mac,
 				win: buildPlatforms.win,
 				linux32: buildPlatforms.linux32,
@@ -80,7 +86,13 @@ module.exports = function(grunt) {
 
 		exec: {
 			win: {
-				cmd: '"build/cache/win/<%= nodewebkit.options.version %>/nw.exe" .'
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/win32/nw.exe" .'
+			},
+            win32: {
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/win32/nw.exe" .'
+			},
+			win64: {
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/win64/nw.exe" .'
 			},
 			mac: {
 				cmd: 'build/cache/mac/<%= nodewebkit.options.version %>/node-webkit-v<%=nodewebkit.options.version%>-osx-ia32/node-webkit.app/Contents/MacOS/node-webkit  .'

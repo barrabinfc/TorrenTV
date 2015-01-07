@@ -177,7 +177,7 @@ TorrenTV.prototype.init = function(options){
         self.devices = new PlayerDevices();
         self.devices.setup_services();
 
-        console.assert(global.torrent   !== null, "Torrent Engine should be created but failed");
+        console.assert(global.torrent   !== null, "Torrent Engine should already be created but failed...");
         console.assert(global.drop_area !== null, "Drop Area failed to create");
 
         // Once dropped a File on our App start downloading
@@ -209,14 +209,9 @@ TorrenTV.prototype.init = function(options){
             item.data('device_uri', device_uri);
             item.appendTo('.deviceList');
 
-            // Put in circular motion
+            // Put DEVICES around a circle
             var devices = $('.deviceList .device');
             for(var i = 0, l = devices.length+1; i < l; i++) {
-                /*
-                var pos_x  = (24   + 40   * Math.cos( Math.PI - 2*(1/l)*i*Math.PI)),
-                    pos_y  = (52.5 + 40   * Math.sin( Math.PI - 2*(1/l)*i*Math.PI));
-                    */
-
                 var pos_x  = (50 + (35* -1*Math.cos( (1/l)*(i+1)*Math.PI))),
                     pos_y  = (50 + (35* Math.sin(    (1/l)*(i+1)*Math.PI)));
 
@@ -296,23 +291,24 @@ TorrenTV.prototype.download = function(torrent_file){
 
     // Download torrent
     $('body').addClass('torrent-loading');
+    
+    // This fires when Stream is first opened
     self.torrent.downloadTorrent(torrent_file).then( function( video_stream_uri ){
-        // This emits when Stream is first opened
         $('body').removeClass('torrent-loading').addClass('torrent-ready')
 
         //self.emit('torrent:file:ready', video_stream_uri)
         //self.emit('video:ready', video_stream_uri)
         return;
-    }).progress(function (args) {
-        self.emit('torrent:file:progress', args)
     }).catch(function(err){
         console.error("Oops, some error occured while downloading torrent!", err);
     }).done()
 
-    // When you are conected to a swarm
+    
+    // When you first meet a torrent swarm, they kindly give you the treasure map!
     self.torrent.on('discovered-files',function(tor_files){
 
-        // Here we can filter what files should be played, show to user, etc
+        // TODO:
+        // Add file selection list, if user wants.
         self.emit('torrent:file:metadata', tor_files);
 
         // or just download everything!
@@ -322,6 +318,7 @@ TorrenTV.prototype.download = function(torrent_file){
         });
     });
 
+    // Delicious Water Data is flowiiing, goood!
     self.torrent.on('torrent:file:progress', function (data) {
             var torrent = data.torrent, 
                 p =       data.progress;
@@ -334,6 +331,9 @@ TorrenTV.prototype.download = function(torrent_file){
             $('.peers').text( p.peers.join('/') );
             $('.size').text( p.size );
     });
+    
+    // Fired when at least X% of the torrent is downloaded.
+    // TODO: Fire torrent:file:buffered if torrent is already on local machine.
     self.torrent.on('torrent:file:buffered', function(video_stream_uri){
         console.log("Wehhaaa, video buffered");
         self.emit('torrent:file:ready', video_stream_uri);
@@ -354,8 +354,8 @@ TorrenTV.prototype.download = function(torrent_file){
 
 /*
  * Stream video over HTTP .  
- * We create a fake 'files' since peerflix already do this marvelously,
- * i've just monkey patchit.
+ * We create a fake 'files' array since peerflix already do this marvelously,
+ * just monkey patch and plug it.
  *
  */
 TorrenTV.prototype.serveFile = function(file){
@@ -404,7 +404,10 @@ TorrenTV.prototype.play = function( video_stream_uri, device_uri ){
 
 
 /*
- * Better crash-dumps
+ * Better crash-dumps.
+ *
+ * But i cannot build 'exception' module on windows...
+ * 
  *
 var Exception = require('exception');
 process.once('uncaughtException', function derp(err) {
@@ -432,7 +435,7 @@ window.addEventListener("load", function() {
         if(n_utils.isValidFile(last_arg))
             global.app.loadFile( cmdline );
         else
-            win.focus()
+            win.focus();
     });
 
 
