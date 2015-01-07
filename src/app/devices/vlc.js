@@ -37,9 +37,12 @@ var getVlcPath = function(){
         if(key){
             cpath = key['InstallDir'].value + path.sep + 'vlc';
         }
-    } else {
+    } else if(/darwin/.test( process.platform )){
         cpath = '/Applications/VLC.app/Contents/MacOS/VLC'
+    } else if(/linux/.test(process.platform)){
+        cpath = 'vlc'
     }
+
     return cpath
 }
 
@@ -56,7 +59,6 @@ var launchTest = function(args){
 
     try {
         child = proc.exec( app_path  + VLC_TEST_ARGS + ' || ' +
-                           'vlc'     + VLC_TEST_ARGS + ' || ' + 
                            home + app_path + VLC_TEST_ARGS ,
                             {timeout: 100}, function(error,stdout,stderr){
             if(error !== null)
@@ -91,9 +93,8 @@ var launchApp = function( args ) {
 
         var c_args = VLC_ARGS.split(' ').concat( args ).join(' ')
 
-        _launcher = ('vlc'              + ' ' + c_args +    ' || ' + 
-                    home + app_path     + ' ' + c_args +    ' || ' + 
-                    app_path            + ' ' + c_args  )
+        _launcher = app_path            + ' ' + c_args + ' || ' +
+                    home + app_path     + ' ' + c_args;
         console.log('launchVlcApp: ', _launcher, c_args)
     }
 
