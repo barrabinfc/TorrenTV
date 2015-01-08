@@ -267,6 +267,7 @@ a:hover {
 .dropArea.has-file .info-message {
     transform: translateY(-100px);
     opacity: 0;
+    pointer-events: none;
 }
 
 
@@ -323,6 +324,7 @@ a:hover {
     text-shadow: rgba(0,0,0,0.5) -1px 0, rgba(0,0,0,0.3) 0 -1px,
                  rgba(255,255,255,0.5) 0 1px, rgba(0,0,0,0.3) -1px -2px;
     text-overflow: ellipsis;
+    word-break: break-word;
     overflow: hidden;
 
     font-size: 20px;
@@ -330,7 +332,7 @@ a:hover {
 }
 
 .torrent-status > .stats {
-    top: 70%;
+    top: 75%;
     position: absolute;
     border-radius: 30px;
     background-color: rgba(0,0,0,0.8);

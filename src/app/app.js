@@ -86,7 +86,7 @@ TorrenTV.prototype.loadFile = function(file){
     var self = this;
 
     if(file)
-        self.drop_area.handling(file)
+        self.drop_area.handleFile(file)
     else
         self.drop_area.openFileDialog();
 }
@@ -100,6 +100,7 @@ TorrenTV.prototype.init = function(options){
     self.drop_area = null;
     self.devices = null;
     self.loading_progress = null;
+    self.screen_state = 'wait-for-torrent';
 
     self.config = options;
 
@@ -128,9 +129,14 @@ TorrenTV.prototype.init = function(options){
 
         var tray = new gui.Tray({ icon: './src/app/media/images/icons/icon-app-mini@2x.png' });
         var menu = new gui.Menu()
-            menu.append(new gui.MenuItem({label: 'Open magnet/torrent', click: function(){
-                self.loadFile();
-            }, key: 'o', 'modifiers': 'cmd'}));
+
+
+        menu.append(new gui.MenuItem({label: 'Open magnet/torrent', click: _.bind(function(){
+            self.loadFile();
+        }, this), key: 'o', 'modifiers': 'cmd'}));
+        menu.append(new gui.MenuItem({label: 'Toggle torrent/player screen', click: _.bind(function(){
+            self.toggleScreen( null );
+        }, this), key: 't'}))
         menu.append(new gui.MenuItem({type: 'checkbox', label: 'Autoplay', checked: Settings.auto_play, 'click': function(){
             Settings.auto_play = !Settings.auto_play;
         }}));
@@ -169,7 +175,7 @@ TorrenTV.prototype.init = function(options){
         global.torrent = self.torrent;
 
         // Start droparea
-        self.drop_area = new DropArea( {el: $(document)} );
+        self.drop_area = new DropArea( {el: $(document)} );;
         global.drop_area = self.drop_area;
 
         // Player devices
@@ -181,7 +187,7 @@ TorrenTV.prototype.init = function(options){
 
         // Once dropped a File on our App start downloading
         self.drop_area.on('drop',    function(file){
-            $('.flipbook').removeClass('flip')
+            self.toggleScreen('wait-for-torrent');
 
             if(n_utils.isMagnet(file) || n_utils.isTorrent(file) || n_utils.isHttpResource(file)) self.download(file)
             else                                                                                  self.serveFile(file)
@@ -192,7 +198,7 @@ TorrenTV.prototype.init = function(options){
             self.devices.startDeviceScan();
 
             /* Change to device view */
-            $('.flipbook').addClass('flip');
+            self.toggleScreen('wait-for-players')
             if(Settings.auto_play){
                 self.devices.play(Settings.address);
             }
@@ -223,9 +229,10 @@ TorrenTV.prototype.init = function(options){
             $('#'+device.name).remove();
         }); 
 
+
         // Back to torrent view when playing
         self.devices.on('playing', function(){
-            $('.flipbook').removeClass('flip');
+            //$('.flipbook').removeClass('flip');
         });
 
 
@@ -268,7 +275,30 @@ TorrenTV.prototype.init = function(options){
 };
 
 
+/*
+ * Toggle screen mode (flip the circle).
+ *
+ * If null is passed, automatically flip.
+ * Otherwise, only flip if necssary
+ */
+TorrenTV.prototype.toggleScreen = function( new_state ){
+    var self = this;
 
+    // get next state if new_state == null
+    var av_states = ['wait-for-players','wait-for-torrent']
+    if(new_state == null){
+        var j = av_states.indexOf( self.screen_state )
+        new_state = av_states[(j + 1) % av_states.length]
+    }
+
+    if(new_state == self.screen_state)
+        return
+
+    var action = (new_state == 'wait-for-players' ? 'addClass' : 'removeClass')
+    $('.flipbook')[action]('flip');
+
+    self.screen_state = new_state;
+}
 
 
 
@@ -420,7 +450,7 @@ process.once('uncaughtException', function derp(err) {
 var last_arg = gui.App.argv.pop();
 
 // Slavoj Žižek: The Reality of the Virtual ...
-// var last_arg = 'magnet:?xt=urn:btih:97FCEEF8CC2228FEE253FE51A8E3D8C0C2438457&dn=slavoj+zizek+the+reality+of+the+virtual+2004+dvdrip+480p+h264&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.com%3A1337';
+var last_arg = 'magnet:?xt=urn:btih:97FCEEF8CC2228FEE253FE51A8E3D8C0C2438457&dn=slavoj+zizek+the+reality+of+the+virtual+2004+dvdrip+480p+h264&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.com%3A1337';
 //
 var app_config = {'start_torrent': (n_utils.isValidFile(last_arg) ? last_arg : undefined)};
 
