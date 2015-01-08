@@ -124,12 +124,11 @@ TorrenTV.prototype.init = function(options){
         var nativeMenuBar = new gui.Menu({type: "menubar"});
         if(isMac){
             nativeMenuBar.createMacBuiltin('TorrenTV', {'hideEdit': false})
-            
+            console.log("isMac, nativeMenuBar")
         }
 
-        var tray = new gui.Tray({ icon: 'src/app/media/images/icons/icon-app-mini@2x.png' });
-        var menu = new gui.Menu()
-
+        var tray = new gui.Tray({ icon: "./src/app/media/images/icons/icon-app-mini@2x.png" });
+        var menu = new gui.Menu();
 
         menu.append(new gui.MenuItem({label: 'Open magnet/torrent', click: _.bind(function(){
             self.loadFile();
@@ -335,8 +334,8 @@ TorrenTV.prototype.download = function(torrent_file){
     self.torrent.downloadTorrent(torrent_file).then( function( video_stream_uri ){
         $('body').removeClass('torrent-loading').addClass('torrent-ready')
 
-        //self.emit('torrent:file:ready', video_stream_uri)
-        //self.emit('video:ready', video_stream_uri)
+        self.emit('torrent:file:ready', video_stream_uri)
+        self.emit('video:ready', video_stream_uri)
         return;
     }).catch(function(err){
         console.error("Oops, some error occured while downloading torrent!", err);
@@ -374,9 +373,9 @@ TorrenTV.prototype.download = function(torrent_file){
     // Fired when at least X% of the torrent is downloaded.
     // TODO: Fire torrent:file:buffered if torrent is already on local machine.
     self.torrent.on('torrent:file:buffered', function(video_stream_uri){
-        console.log("Wehhaaa, video buffered");
-        self.emit('torrent:file:ready', video_stream_uri);
-        self.emit('video:ready', video_stream_uri);
+        //console.log("Wehhaaa, video buffered");
+        //self.emit('torrent:file:ready', video_stream_uri);
+        //self.emit('video:ready', video_stream_uri);
     });
 
     // Progress bar
@@ -459,7 +458,7 @@ process.once('uncaughtException', function derp(err) {
 var last_arg = gui.App.argv.pop();
 
 // Slavoj Žižek: The Reality of the Virtual ...
-var last_arg = 'magnet:?xt=urn:btih:97FCEEF8CC2228FEE253FE51A8E3D8C0C2438457&dn=slavoj+zizek+the+reality+of+the+virtual+2004+dvdrip+480p+h264&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.com%3A1337';
+// var last_arg = 'magnet:?xt=urn:btih:97FCEEF8CC2228FEE253FE51A8E3D8C0C2438457&dn=slavoj+zizek+the+reality+of+the+virtual+2004+dvdrip+480p+h264&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.com%3A1337';
 //
 var app_config = {'start_torrent': (n_utils.isValidFile(last_arg) ? last_arg : undefined)};
 
