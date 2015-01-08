@@ -48,7 +48,7 @@
   },
   "window": {
     "title": "TorrenTV",
-    "icon": "./media/images/icons/icon.png",
+    "icon": "./src/app/media/images/icons/icon-app@2x.png",
     "frame": false,
     "resizable": false,
     "transparent": true,
@@ -57,6 +57,7 @@
     "toolbar": false,
     "always-on-top": false,
     "show-in-taskbar": true,
+    "single-instance": true,
     "width": 350,
     "height": 300
   },

@@ -127,7 +127,7 @@ TorrenTV.prototype.init = function(options){
             
         }
 
-        var tray = new gui.Tray({ icon: './src/app/media/images/icons/icon-app-mini@2x.png' });
+        var tray = new gui.Tray({ icon: 'src/app/media/images/icons/icon-app-mini@2x.png' });
         var menu = new gui.Menu()
 
 
@@ -161,6 +161,14 @@ TorrenTV.prototype.init = function(options){
 
         mouseTrap.bind('f12', function() {
             win.showDevTools();
+        });
+        mouseTrap.bind('command+o', function(){
+            self.loadFile();
+            return false;
+        });
+        mouseTrap.bind('command+t', function(){
+            self.toggleScreen(null);
+            return false;
         });
         $(document).on('paste', function(e){
             var data = (e.originalEvent || e).clipboardData.getData('text/plain')
@@ -296,6 +304,7 @@ TorrenTV.prototype.toggleScreen = function( new_state ){
 
     var action = (new_state == 'wait-for-players' ? 'addClass' : 'removeClass')
     $('.flipbook')[action]('flip');
+    gui.Window.get().focus();
 
     self.screen_state = new_state;
 }
