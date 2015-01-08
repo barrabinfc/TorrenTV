@@ -1,7 +1,7 @@
 {
   "name": "TorrenTV",
   "version": "0.9.9",
-  "description": "Send torrent streaming directly to AppleTV/XBMC via Airplay",
+  "description": "A torrent streaming client to VLC/AppleTV/XBMC via Airplay",
   "main": "app://host/src/app/index.html",
   "chromium-args": "--enable-threaded-compositing",
   "scripts": {
@@ -58,6 +58,7 @@
     "toolbar": false,
     "always-on-top": false,
     "show-in-taskbar": true,
+    "single-instance": true,
     "width": 350,
     "height": 300
   },
@@ -65,6 +66,7 @@
     "grunt": "latest",
     "grunt-contrib-clean": "latest",
     "grunt-contrib-compress": "latest",
+    "grunt-contrib-copy": "^0.7.0",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-exec": "latest",
     "grunt-jsvalidate": "latest",

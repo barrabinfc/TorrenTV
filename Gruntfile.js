@@ -31,13 +31,16 @@ module.exports = function(grunt) {
 	require('load-grunt-tasks')(grunt);
 	grunt.loadNpmTasks('grunt-jsvalidate');
 
+    grunt.loadNpmTasks('grunt-contrib-copy');
+
 	grunt.registerTask('build', [
-		'nodewebkit'
+		'nodewebkit',
 	]);
 
 	grunt.registerTask('dist', [
 		'clean:releases',
 		'build',
+        //'copy',
 		'exec:createDmg',       // mac
 		'exec:createWinInstall',
 		'compress' // win & linux
@@ -63,7 +66,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
 		nodewebkit: {
 			options: {
-				version: '0.11.2',
+				version: 'latest',
 				buildDir: './build', // Where the build version of my node-webkit app is saved
                 buildType: 'versioned',
 				cacheDir: './build/cache',
@@ -78,10 +81,12 @@ module.exports = function(grunt) {
 				linux32: buildPlatforms.linux32,
 				linux64: buildPlatforms.linux64,
 			},
-			src: ['./src/**', '!./src/app/styl/**',
-				  './node_modules/**', '!./node_modules/bower/**', '!./node_modules/*grunt*/**', '!./node_modules/stylus/**',
-				'!./**/test*/**', '!./**/doc*/**', '!./**/example*/**', '!./**/demo*/**', '!./**/bin/**', '!./**/build/**', '!./**/.*/**',
-				'./src/app/package.json', './README.md', './LICENSE.txt' ]
+			src: ['./src/**', 
+				  './node_modules/**', 
+                  '!./node_modules/bower/**', '!./node_modules/*grunt*/**', 
+				 '!./**/test*/**', '!./**/doc*/**', 
+                 '!./**/example*/**', '!./**/demo*/**', '!./**/bin/**', '!./**/build/**', '!./**/.*/**',
+				 './src/app/package.json', './README.md', './LICENSE.txt' ]
 		},
 
 		exec: {
@@ -95,13 +100,13 @@ module.exports = function(grunt) {
 				cmd: '"build/cache/<%= nodewebkit.options.version %>/win64/nw.exe" .'
 			},
 			mac: {
-				cmd: 'build/cache/mac/<%= nodewebkit.options.version %>/node-webkit-v<%=nodewebkit.options.version%>-osx-ia32/node-webkit.app/Contents/MacOS/node-webkit  .'
+				cmd: 'build/cache/<%= nodewebkit.options.version %>/osx32/node-webkit.app/Contents/MacOS/node-webkit  .'
 			},
 			linux32: {
-				cmd: '"build/cache/linux32/<%= nodewebkit.options.version %>/nw" .'
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/linux32/nw" .'
 			},
 			linux64: {
-				cmd: '"build/cache/linux64/<%= nodewebkit.options.version %>/nw" .'
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/linux64/nw" .'
 			},
 			createDmg: {
 				cmd: 'dist/mac/yoursway-create-dmg/create-dmg --volname "TorrenTV ' + currentVersion + '" --background ./dist/mac/background.png --window-size 480 540 --icon-size 128 --app-drop-link 240 370 --icon "TorrenTV" 240 110 ./build/releases/TorrenTV/mac/TorrenTV-' + currentVersion + '-Mac.dmg ./build/releases/TorrenTV/mac/'
@@ -137,6 +142,21 @@ module.exports = function(grunt) {
 				}
 			}
 		},
+
+        /* FFMPeg libraries with more codecs 
+        copy: {
+            main: {
+                files: [{
+                        src: 'dist/win/ffmpegsumo.dll',
+                        dest: 'build/releases/TorrenTV/win32/TorrenTV/ffmpegsumo.dll',
+                    },
+                    {
+                        src: 'dist/mac/ffmpegsumo.so',
+                        dest: 'build/releases/TorrenTV/mac/TorrenTV.app/Contents/Frameworks/node-webkit Framework.framework/Libraries/ffmpegsumo.so'
+                    }]
+            }
+        },
+        */
 
 		compress: {
 			linux32: {

@@ -103,9 +103,6 @@ TorrenTV.prototype.init = function(options){
 
     self.config = options;
 
-    console.info("CWD: ",process.cwd())
-    console.info("PATH: ",execPath)
-
     function clean(){
         if( Settings.DEBUG ){
             //win.showDevTools();
@@ -129,18 +126,20 @@ TorrenTV.prototype.init = function(options){
             
         }
 
-            var tray = new gui.Tray({ icon: 'src/app/media/images/icons/icon-app-mini@2x.png' });
-            var menu = new gui.Menu()
-            menu.append(new gui.MenuItem({label: 'Open magnet/torrent', click: self.loadFile, key: 'o', 'modifiers': 'cmd'}));
-            menu.append(new gui.MenuItem({type: 'checkbox', label: 'Autoplay', checked: Settings.auto_play, 'click': function(){
-                Settings.auto_play = !Settings.auto_play;
-            }}));
-            menu.append(new gui.MenuItem({label: 'Open Downloads folder', 'click': function(){
-                gui.Shell.showItemInFolder( path.resolve( Settings.torrent_path )  );
-            }}));
-            menu.append(new gui.MenuItem({type: 'separator'}))
-            menu.append(new gui.MenuItem({label: 'Quit', click: self.exit}))
-            tray.menu = menu;
+        var tray = new gui.Tray({ icon: './src/app/media/images/icons/icon-app-mini@2x.png' });
+        var menu = new gui.Menu()
+            menu.append(new gui.MenuItem({label: 'Open magnet/torrent', click: function(){
+                self.loadFile();
+            }, key: 'o', 'modifiers': 'cmd'}));
+        menu.append(new gui.MenuItem({type: 'checkbox', label: 'Autoplay', checked: Settings.auto_play, 'click': function(){
+            Settings.auto_play = !Settings.auto_play;
+        }}));
+        menu.append(new gui.MenuItem({label: 'Open Downloads folder', 'click': function(){
+            gui.Shell.showItemInFolder( path.resolve( Settings.torrent_path )  );
+        }}));
+        menu.append(new gui.MenuItem({type: 'separator'}))
+        menu.append(new gui.MenuItem({label: 'Quit', click: self.exit}))
+        tray.menu = menu;
 
         // Window Size/State
         win.moveTo( Settings.window.x, Settings.window.y );
@@ -243,28 +242,29 @@ TorrenTV.prototype.init = function(options){
 
             self.devices.play(Settings.address, dev_uri)
         });
+
+        setTimeout(function () {
+            self.emit('app:ready')
+        },10);
     }
 
     clean();
     setup();
 
 
-    setTimeout(function () {
-        self.emit('app:ready')
-    },10);
+    self.on('app:ready', function(){
+        // Start s
+        if( Settings.device_discovery_on_startup){
+            console.log('device_discovery_on_startup');
+            self.devices.startDeviceScan()
+        }
 
-    // Start s
-    if( Settings.device_discovery_on_startup){
-        console.log('device_discovery_on_startup');
-        self.devices.startDeviceScan()
-    }
+        // there's already a torrent/magnet? Oh boy, start
+        // right away!
+        if(self.config.start_torrent)
+            self.loadFile( self.config.start_torrent );
+    });
 
-    // there's already a torrent/magnet? Oh boy, start
-    // right away!
-    if(self.config.start_torrent)
-        self.loadFile( self.config.start_torrent );
-
-    win.focus();
 };
 
 

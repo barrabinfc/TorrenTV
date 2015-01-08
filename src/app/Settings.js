@@ -13,8 +13,8 @@ Settings.DEBUG   = true;
 Settings.DISCOVERY_TIMEOUT = 7000;
 Settings.DISCOVERY_STATUS  = 'running';
 
-// Load video when 2% is already loaded
-Settings.PRELOAD_BUFFER = 0.02;
+// Load video when 1% is already loaded
+Settings.PRELOAD_BUFFER = 0.01;
 
 // 5fps torrent stats 
 Settings.TORRENT_WATCHING_TIMER = 5; 
