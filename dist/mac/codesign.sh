@@ -1,5 +1,5 @@
 dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-app="$dir/../../build/releases/Popcorn-Time/mac/Popcorn-Time.app"
+app="$dir/../../build/releases/TorrenTV - v0.9.9/osx32/TorrenTV.app"
 identity="867BC7B779C240682C088BBDD206C6D02590F87E"
 
 echo "### signing frameworks"
