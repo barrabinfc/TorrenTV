@@ -394,7 +394,7 @@ a:hover {
     -webkit-backface-visibility: hidden;
 }
 
-.deviceDiscover .loading {
+.deviceDiscovery .loading {
     transform: scale(1.0);
 }
 
