@@ -76,9 +76,8 @@ var launchTest = function(args){
 
     try {
         //child = proc.execFile( app_path,  VLC_TEST_ARGS.split(' ') ,
-        child = proc.execFile( app_path,  VLC_TEST_ARGS.split(' ') ,
-                           {timeout: 300}, function(error,stdout,stderr){
-            console.log(error,stdout,stderr)
+        child = proc.execFile( app_path,  VLC_TEST_ARGS.split(' '),
+                               function(error,stdout,stderr){
             if(error !== null){
                 console.info(error)
                 defered.reject(new Error(("Vlc failed to start...", error)))

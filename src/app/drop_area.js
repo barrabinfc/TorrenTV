@@ -39,22 +39,22 @@ DropArea.prototype.init = function(options){
 
     var doc = $(self.parent_el);
     self.dragQueen = false;
-    doc.on('dragenter', _.throttle( function (e) {    
+    doc.on('dragenter', _.throttle( function (e) {
         if(!self.dragging){
             $(self.el).addClass('drag-hover');
             self.dragging = true;
         }
     }, 100));
-    doc.on('dragend', function (e) {   
+    doc.on('dragend', function (e) {
         if(self.dragQueen){
-            self.dragging = false; 
-            $(self.el).removeClass('drag-hover'); 
+            self.dragging = false;
+            $(self.el).removeClass('drag-hover');
         }
     });
-    doc.on('dragleave', function (e) {  
+    doc.on('dragleave', function (e) {
         if(self.dragging){
-            self.dragging = false; 
-            $(self.el).removeClass('drag-hover'); 
+            self.dragging = false;
+            $(self.el).removeClass('drag-hover');
         }
     });
 
@@ -109,7 +109,7 @@ DropArea.prototype.openFileDialog = function(){
 }
 
 /*
- * Performs mimetype/check if is a torrent/magnet, 
+ * Performs mimetype/check if is a torrent/magnet,
  * video , etc.
  *
  */
@@ -124,7 +124,7 @@ DropArea.prototype.handleFile = function( file ){
         self.emit('drop',file);
     } else {
         console.error("Unknow file dropped: ", file );
-
+/*
         // BUG: default_label is the previous message, not
         // necessarly is correct. We should put a error message, and
         // force state to be back to `wait-for-filedrop`.
@@ -137,6 +137,8 @@ DropArea.prototype.handleFile = function( file ){
             $(self.el).removeClass('error');
         }, 3000);
 
+*/
+        n_utils.flashMessage( 'Not a valid magnet/torrent!' ,'error')
         return;
     }
 

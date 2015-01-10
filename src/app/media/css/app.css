@@ -131,6 +131,9 @@ a:hover {
 
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+
+    -webkit-app-region: no-drag;
+    pointer-events: auto;
 }
 
 .info-message > p {
@@ -144,7 +147,13 @@ a:hover {
 
 
 
-.dropArea.error:after {
+
+
+/*
+ * Error/Message/Success Dialogs
+ */
+body.error .dropArea:after,
+body.error .deviceDiscovery:after {
     position: absolute;
     border-radius: 50%;
     content: '';
@@ -162,6 +171,13 @@ a:hover {
     -webkit-animation-fill-mode: both;
 }
 
+body.message .dropArea:after,
+body.message .deviceDiscovery.after {
+  background-color: rgba(128,128,35, 0.9);
+}
+
+
+
 
 /*
  * General State of app
@@ -170,7 +186,7 @@ a:hover {
  *     (.drag-hover)
  *       ->  (.torrent-prefetch)
  *                  ->  show File Name / progress
- *       -> (torrent:video_buffere)
+ *       -> (torrent:video_buffered)
  *                           ->  select Device
  *
 *             (at this moment the circle spin)
@@ -199,7 +215,7 @@ a:hover {
     position: absolute;
 
     border-radius: 50%;
-    box-shadow: 0px 0px 20px #000;
+    box-shadow: 0px 0px 20px rga(0,0,0,0.6);
 
     width: 100%;
     height: inherit;
@@ -226,6 +242,7 @@ a:hover {
     top: 0px; left: 0px;
     border-radius: 50%;
     overflow: hidden;
+    -webkit-app-region: drag;
 }
 
 .dropArea .bg {
@@ -293,6 +310,9 @@ a:hover {
 
     visibility: hidden;
     color: #fff;
+
+    -webkit-app-region: no-drag;
+    pointer-events: auto;
 }
 .torrent-status > .msg {
     opacity: 0;
@@ -439,6 +459,7 @@ a:hover {
     height: 32px;
     position: absolute;
     pointer-events: auto;
+    -webkit-app-region: no-drag;
 
     left: calc(50%);
     top: calc(50%);
@@ -638,17 +659,19 @@ a:hover {
     position: absolute;
     width: 32px;
     height: 32px;
-    color: white;
+    color: rgb(0,255,148);
     border-radius: 50%;
     left: calc( 50% - 16px );
     top: calc( 50% - 16px );
     text-align: center;
     line-height: 1.4;
-    background-color: rgba(42,42,42,0.75);
     pointer-events: auto;
 
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+
+    -webkit-app-region: nodrag;
+    -webkit-pointer-events:
 }
 
 @-webkit-keyframes circleGrow {
@@ -691,7 +714,14 @@ a:hover {
  * dropArea and deviceDiscovery,
  */
 .flipbook {
+
+    /*
+     * On mac, drag still allow the events to go trought.
+     * In Windows, drag block the event bubbling.
+     *
+     * Disabling for now while i find a fix...
     -webkit-app-region: drag;
+    */
 
     height: 260px;
     width: 260px;

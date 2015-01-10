@@ -1,4 +1,5 @@
 var numeral = require('numeral');
+var _ = require('underscore');
 
 var download = function(url, dest, cb) {
   var file = fs.createWriteStream(dest);
@@ -9,7 +10,6 @@ var download = function(url, dest, cb) {
     });
   });
 }
-
 
 exports.bytes = function(num) {
   return numeral(num).format('0.0b');
@@ -56,6 +56,19 @@ exports.isValidFile = function(link){
 }
 
 
+exports.flashMessage = function(message, klass){
+  var previous_message = $('.info-message').html();
+  if(previous_message == message)
+    return;
+
+  $('.info-message').html(message);
+  $('body').addClass(klass);
+
+  _.delay(function(){
+    $('.info-message').html(previous_message);
+    $('body').removeClass(klass);
+  }, 3000);
+}
+
+
 exports.download   = download;
-
-

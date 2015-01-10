@@ -137,11 +137,11 @@ PlayerDevices.prototype.startDeviceScan = function(){
 
 
     // stop discovery after some time...
-    if(Settings.discovery_timeout > 0){
+    if(Settings.device_discovery_timeout > 0){
         setTimeout(function(){
             self.stopDeviceScan();
             self.emit('timeout');
-        }, Settings.discovery_timeout);
+        }, Settings.device_discovery_timeout);
     }
 }
 

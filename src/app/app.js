@@ -127,23 +127,44 @@ TorrenTV.prototype.init = function(options){
             console.log("isMac, nativeMenuBar")
         }
 
+        /*
+         * TODO:
+
+         * Put tray on its own file plz
+         */
         var tray = new gui.Tray({ icon: "./src/app/media/images/icons/icon-app-mini@2x.png" });
         var menu = new gui.Menu();
 
-        menu.append(new gui.MenuItem({label: 'Open magnet/torrent', click: _.bind(function(){
+        var keys = Settings.keybindings.keys;
+
+        menu.append(new gui.MenuItem({label: 'Open magnet/torrent',
+          'key': keys.open.key, 'modifiers': keys.open.modifier,
+          'click': _.bind(function(){
             self.loadFile();
-        }, this), key: 'o', 'modifiers': 'cmd'}));
-        menu.append(new gui.MenuItem({label: 'Toggle torrent/player screen', click: _.bind(function(){
+          }, this) })
+        );
+        menu.append(new gui.MenuItem({label: 'Toggle torrent/player screen',
+          'key': keys.toggleScreen.key, 'modifiers': keys.toggleScreen.modifier,
+          'click': _.bind(function(){
             self.toggleScreen( null );
-        }, this), key: 't'}))
+          }, this) })
+        );
+
         menu.append(new gui.MenuItem({type: 'checkbox', label: 'Autoplay', checked: Settings.auto_play, 'click': function(){
             Settings.auto_play = !Settings.auto_play;
         }}));
-        menu.append(new gui.MenuItem({label: 'Open Downloads folder', 'click': function(){
-            gui.Shell.showItemInFolder( path.resolve( Settings.torrent_path )  );
-        }}));
+        menu.append(new gui.MenuItem({label: 'Open Downloads folder',
+          'key': keys.download.key, 'modifiers': keys.download.modifier,
+          'click': function(){
+              gui.Shell.showItemInFolder( path.resolve( Settings.torrent_path )  );
+          }})
+        );
         menu.append(new gui.MenuItem({type: 'separator'}))
-        menu.append(new gui.MenuItem({label: 'Quit', click: self.exit}))
+        menu.append(new gui.MenuItem({label: 'Quit',
+        'key': keys.quit.key, 'modifiers': keys.quit.modifier,
+          click: self.exit}));
+
+
         tray.menu = menu;
 
         // Window Size/State
@@ -157,7 +178,8 @@ TorrenTV.prototype.init = function(options){
         Mousetrap.bind('f12', function() {
             win.showDevTools();
         });
-        Mousetrap.bind(['command+o','ctrl-o'], function(){
+        /*
+        Mousetrap.bind(['ctrl+o','command-o'], function(){
             self.loadFile();
             return false;
         });
@@ -165,6 +187,7 @@ TorrenTV.prototype.init = function(options){
             self.toggleScreen(null);
             return false;
         });
+        */
         $(document).on('paste', function(e){
             var data = (e.originalEvent || e).clipboardData.getData('text/plain')
             self.drop_area.handleFile( data );
