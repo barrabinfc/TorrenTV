@@ -53,6 +53,7 @@ Torrents.prototype.init = function(options){
     var self = this;
     self.config = options;
     self.loading = false;
+    self.downloading = false;
     self.engine = null;
 
 }
@@ -91,9 +92,7 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
         return !wire.peerChoking;
     };
 
-    self.engine.on('download', function (piece_index) {
-        console.log("Downloaded piece_index: ", piece_index);
-    })
+    self.engine.on('download', function (piece_index) {});
 
     // peerflix started serving the File!
     self.engine.server.on('listening', function() {
@@ -106,6 +105,7 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
         Settings.address = href;
 
         self.loading = false;
+        self.downloading = true;
 
         // Updating is based on setInterval
         defer.resolve(href)
@@ -118,11 +118,11 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
 
         var p = {peers:         [ _.filter(self.wires, isActive).length, self.wires.length],
                  name:          self.engine.torrent.name,
-                 sizeBytes:    _.reduce( 
+                 sizeBytes:    _.reduce(
                             _.pluck( self.engine.files, 'length' ), function(a,b){
                                     return a+b;
                             }),
-                 size:    bytes( _.reduce( 
+                 size:    bytes( _.reduce(
                             _.pluck( self.engine.files, 'length' ), function(a,b){
                                     return a+b;
                             }) ),
@@ -144,7 +144,8 @@ Torrents.prototype.downloadTorrent = function( torrent_file ){
 
     self.engine.server.once('error', function(e){
         self.loading = false;
-        console.error("Error on torrent engine: ",e)
+        self.downloading  =  false;
+        console.error("Error on torrent engine: ",e.message)
         defer.reject(new Error(e))
 
         // Restart on perrlix error?

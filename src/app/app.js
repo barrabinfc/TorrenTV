@@ -193,11 +193,16 @@ TorrenTV.prototype.init = function(options){
 
         // Once dropped a File on our App start downloading
         self.drop_area.on('drop',    function(file){
+
+            // TODO: Allow multiple videos simultaneously
+            if(self.torrent.downloading)
+              return;
+
             self.toggleScreen('wait-for-torrent');
 
             if(n_utils.isMagnet(file) || n_utils.isTorrent(file) || n_utils.isHttpResource(file)) self.download(file)
             else                                                                                  self.serveFile(file)
-        })
+        });
 
         // Video ready to play, bitches
         self.on('video:ready', function(file){
