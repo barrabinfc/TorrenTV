@@ -7,6 +7,8 @@ var os = require('os'),
 
 var Settings = {};
 
+Settings.HOME = (process.platform === 'win32') ? process.env.HOMEPATH : process.env.HOME;
+
 Settings.version = currentVersion;
 Settings.address = '192.168.0.101:8000';
 Settings.DEBUG   = true;
@@ -16,9 +18,9 @@ Settings.DISCOVERY_STATUS  = 'running';
 // Load video when 1% is already loaded
 Settings.PRELOAD_BUFFER = 0.01;
 
-// 5fps torrent stats 
-Settings.TORRENT_WATCHING_TIMER = 5; 
-Settings.torrent_path = process.env.HOME + '/Downloads'
+// 5fps torrent stats
+Settings.TORRENT_WATCHING_TIMER = 5;
+Settings.torrent_path = path.join( Settings.HOME + '/Downloads' )
 
 Settings.auto_update = true;
 Settings.remove_downloads_on_exit = true;

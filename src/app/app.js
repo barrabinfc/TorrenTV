@@ -35,7 +35,7 @@ var PlayerDevices = require('./devices').PlayerDevices;
 /*
  * TorrenTV app
  *
- * 
+ *
  *
  *                               Device discovery (airplay/vlc/chromecast)
  *
@@ -47,7 +47,7 @@ var PlayerDevices = require('./devices').PlayerDevices;
  *
  *
  *
- * They communicated using events ands promises. TorrentTVApp is the main controller, 
+ * They communicated using events ands promises. TorrentTVApp is the main controller,
  * handling the issue of commands , and responses from each component.
  *
  */
@@ -154,18 +154,18 @@ TorrenTV.prototype.init = function(options){
         $(document).on('drop',     function(e){ e.preventDefault(); return false; } );
 
         // Keys
-        var ComboKey = require('combokeys');
-        var mouseTrap = new ComboKey(document);
+        //var ComboKey = require('combokeys');
+        var mouseTrap = require('mousetrap');
         global.mouseTrap = mouseTrap;
 
         mouseTrap.bind('f12', function() {
             win.showDevTools();
         });
-        mouseTrap.bind('command+o', function(){
+        mouseTrap.bind(['command+o','ctrl-o'], function(){
             self.loadFile();
             return false;
         });
-        mouseTrap.bind('command+t', function(){
+        mouseTrap.bind(['command+t','ctrl-v'], function(){
             self.toggleScreen(null);
             return false;
         });
@@ -175,6 +175,9 @@ TorrenTV.prototype.init = function(options){
             return true;
         });
     }
+
+
+
 
     function setup(){
         // Torrent engine
@@ -215,8 +218,8 @@ TorrenTV.prototype.init = function(options){
         /* New device detected */
         self.devices.on('deviceOn',  function(device, device_uri){
             var item = $('<a class="device animate ' + device.name + '" title="Play in ' + device.name + '" id="' + device.name + '">' +
-                            '<i class="fa micon fa-play-circle ' + device.name +'-icon"></i>' + 
-                            '<h4>' + device_uri + '</h4>' + 
+                            '<i class="fa micon fa-play-circle ' + device.name +'-icon"></i>' +
+                            '<h4>' + device_uri + '</h4>' +
                         '</a>');
             item.data('device_uri', device_uri);
             item.appendTo('.deviceList');
@@ -231,10 +234,10 @@ TorrenTV.prototype.init = function(options){
                 $(devices[i]).css({opacity: 1.0, left: pos_x.toFixed(4)+'%', top: pos_y.toFixed(4) + '%'});
             }
         });
-        self.devices.on('deviceOff', function(device, device_uri) { 
+        self.devices.on('deviceOff', function(device, device_uri) {
             console.log('deviceOff ', device.name)
             $('#'+device.name).remove();
-        }); 
+        });
 
 
         // Back to torrent view when playing
@@ -261,6 +264,7 @@ TorrenTV.prototype.init = function(options){
             self.emit('app:ready')
         },10);
     }
+
 
     clean();
     setup();
@@ -329,7 +333,7 @@ TorrenTV.prototype.download = function(torrent_file){
 
     // Download torrent
     $('body').addClass('torrent-loading');
-    
+
     // This fires when Stream is first opened
     self.torrent.downloadTorrent(torrent_file).then( function( video_stream_uri ){
         $('body').removeClass('torrent-loading').addClass('torrent-ready')
@@ -341,7 +345,7 @@ TorrenTV.prototype.download = function(torrent_file){
         console.error("Oops, some error occured while downloading torrent!", err);
     }).done()
 
-    
+
     // When you first meet a torrent swarm, they kindly give you the treasure map!
     self.torrent.on('discovered-files',function(tor_files){
 
@@ -358,7 +362,7 @@ TorrenTV.prototype.download = function(torrent_file){
 
     // Delicious Water Data is flowiiing, goood!
     self.torrent.on('torrent:file:progress', function (data) {
-            var torrent = data.torrent, 
+            var torrent = data.torrent,
                 p =       data.progress;
 
             self.loading_progress.animate(p.ratio);
@@ -369,7 +373,7 @@ TorrenTV.prototype.download = function(torrent_file){
             $('.peers').text( p.peers.join('/') );
             $('.size').text( p.size );
     });
-    
+
     // Fired when at least X% of the torrent is downloaded.
     // TODO: Fire torrent:file:buffered if torrent is already on local machine.
     self.torrent.on('torrent:file:buffered', function(video_stream_uri){
@@ -391,7 +395,7 @@ TorrenTV.prototype.download = function(torrent_file){
 
 
 /*
- * Stream video over HTTP .  
+ * Stream video over HTTP .
  * We create a fake 'files' array since peerflix already do this marvelously,
  * just monkey patch and plug it.
  *
@@ -445,7 +449,7 @@ TorrenTV.prototype.play = function( video_stream_uri, device_uri ){
  * Better crash-dumps.
  *
  * But i cannot build 'exception' module on windows...
- * 
+ *
  *
 var Exception = require('exception');
 process.once('uncaughtException', function derp(err) {
@@ -470,7 +474,7 @@ window.addEventListener("load", function() {
         win.focus();
     });
     gui.App.on('open', function (cmdline) {
-        var last_arg = cmdline.split(' ').pop() 
+        var last_arg = cmdline.split(' ').pop()
         if(n_utils.isValidFile(last_arg))
             global.app.loadFile( cmdline );
         else
@@ -489,9 +493,8 @@ process.once("SIGTERM", function () {
     process.exit(0);
 });
 process.on('uncaughtException', function(err,e){
-    console.info('Caught excetion ' , err);
-    console.info(console.trace());
+    console.info('Caught excetion: ' , err.message );
+    console.info( err.stack )
     //process.exit(-1);
     win.showDevTools();
 });
-

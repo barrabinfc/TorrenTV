@@ -394,12 +394,16 @@ a:hover {
     -webkit-backface-visibility: hidden;
 }
 
+.deviceDiscover .loading {
+    transform: scale(1.0);
+}
+
 .deviceDiscovery .bg {
     background: url(media/images/bg_0.gif) center;
 }
+
 .torrent-ready .deviceDiscovery .loading {
     opacity: 1;
-    transform: scale(1.0);
 }
 
 
