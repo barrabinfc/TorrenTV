@@ -41,7 +41,7 @@ PlayerDevices.prototype.play = function(video_address, device_uri){
 
     if(!device_uri && self.default_device ){
         self.default_device.play(video_address);
-    } else { 
+    } else {
 
         if( _.isFunction(self.devices[device_uri].play) )
             self.devices[device_uri].play(video_address)
@@ -68,9 +68,9 @@ PlayerDevices.prototype.setup_services = function(){
 
                 try {
                     /*
-                    * Create a new service discovery. 
+                    * Create a new service discovery.
                     *
-                    * We force a closure to force always a service.name , since 
+                    * We force a closure to force always a service.name , since
                     *   some services doesnt have it
                     */
                     var service_instance = new ServiceConstructor(settings);
@@ -90,7 +90,7 @@ PlayerDevices.prototype.setup_services = function(){
     }catch(err){
         console.error("Couldnt setup Discovery Services (airplay/xbmc/etc)!", err);
     }
-} 
+}
 
 PlayerDevices.prototype.forceClean = function(){
     var self = this;
@@ -149,10 +149,12 @@ PlayerDevices.prototype.stopDeviceScan = function(){
     var self = this;
 
     self.discovering = false;
-    for(var serv_name in self.services){
+    for(var serv_name in _.keys(self.services)){
         var service = self.services[serv_name];
         try {
-            service.stop();
+            if(_.isFunction(service['stop']))
+              service.stop();
+
         } catch(err){
             console.log('stopDeviceScan: failed device stop for', serv_name);
             console.error(err)
@@ -166,7 +168,7 @@ PlayerDevices.prototype.stopDeviceScan = function(){
 
 /*
  * Called when a playing device was discovered.
- * Some clients will send device-detected many times, so here we 
+ * Some clients will send device-detected many times, so here we
  * filter this
  */
 PlayerDevices.prototype.detectedDevice = function(device, server_name){
@@ -205,7 +207,7 @@ PlayerDevices.prototype.deviceOff = function(device, server_name){
     // delete
     if(_.has(self.devices, device_uri )){
         console.log("deviceOff: ", device_uri);
-        delete self.devices[device_uri] 
+        delete self.devices[device_uri]
     }
 }
 
