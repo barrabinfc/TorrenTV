@@ -1,25 +1,25 @@
 @font-face {
   font-family: 'Open Sans';
-  src: url("media/fonts/OpenSans-Regular-webfont.woff");
+  src: url("../fonts/OpenSans-Regular-webfont.woff");
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'Open Sans Bold';
-  src: url("media/fonts/OpenSans-Bold-webfont.woff");
+  src: url("../fonts/OpenSans-Bold-webfont.woff");
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'Oswald';
-  src: url("media/fonts/Oswald-Regular.ttf");
+  src: url("../fonts/Oswald-Regular.ttf");
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Oswald Bold';
-  src: url("media/fonts/Oswald-Bold.ttf");
+  src: url("../fonts/Oswald-Bold.ttf");
   font-weight: 700;
   font-style: normal;
 }
@@ -229,8 +229,8 @@ a:hover {
 }
 
 .dropArea .bg {
-    background: url(media/images/progress.gif) center/0% no-repeat,
-                url(media/images/bg_2.gif) center/120% no-repeat border-box;
+    background: url(../images/progress.gif) center/0% no-repeat,
+                url(../images/bg_2.gif) center/120% no-repeat border-box;
 
     -webkit-animation: dropAreaRotate 120s infinite;
 }
@@ -399,7 +399,7 @@ a:hover {
 }
 
 .deviceDiscovery .bg {
-    background: url(media/images/bg_0.gif) center;
+    background: url(../images/bg_0.gif) center;
 }
 
 .torrent-ready .deviceDiscovery .loading {
@@ -519,71 +519,71 @@ a:hover {
 
 
 .device-icon {
-   content:url("./media/images/AirplayIconSmall.png");
+   content:url("./../images/AirplayIconSmall.png");
 }
 
 .device-icon.off {
-    content:url("./media/images/AirplaySmallOff.png");
+    content:url("./../images/AirplaySmallOff.png");
 }
 
 .airplay-icon {
-   content:url("./media/images/AirplayIconSmall.png");
+   content:url("./../images/AirplayIconSmall.png");
 }
 
 .airplay-icon.off {
-    content:url("./media/images/AirplaySmallOff.png");
+    content:url("./../images/AirplaySmallOff.png");
 }
 
 .chrome-icon {
-   content:url("./media/images/ChromecastSmall.png");
+   content:url("./../images/ChromecastSmall.png");
 }
 
 .chrome-icon.off {
-   content:url("./media/images/ChromecastSmallOff.png");
+   content:url("./../images/ChromecastSmallOff.png");
 }
 
 .vlc-icon {
-   content:url("./media/images/external-vlc-icon.png");
+   content:url("./../images/external-vlc-icon.png");
 }
 
 .vlc-icon.off {
-    content:url("./media/images/AirplaySmallOff.png");
+    content:url("./../images/AirplaySmallOff.png");
 }
 
 .xbmc-icon {
-   content:url("./media/images/AirplayIconSmall.png");
+   content:url("./../images/AirplayIconSmall.png");
 }
 
 .xbmc-icon.off {
-   content:url("./media/images/AirplaySmallOff.png");
+   content:url("./../images/AirplaySmallOff.png");
 }
 
 
 .playbutton {
-    content:url("./media/images/play.png");
+    content:url("./../images/play.png");
     cursor:pointer;
 }
 
 .forwardbutton {
-    content:url("./media/images/forward.png");
+    content:url("./../images/forward.png");
     cursor:pointer;
 }
 
 
 .rewindbutton {
-    content:url("./media/images/rewind.png");
+    content:url("./../images/rewind.png");
     cursor:pointer;
 }
 
 .stopbutton {
     margin-top: -20px;
-   content:url("./media/images/stop.png");
+   content:url("./../images/stop.png");
     cursor:pointer;
 }
 
 .pausebutton {
     margin-top: -20px;
-   content:url("./media/images/pause.png");
+   content:url("./../images/pause.png");
     margin-right:9px;
     cursor:pointer;
 }
