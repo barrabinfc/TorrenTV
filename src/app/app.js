@@ -154,18 +154,14 @@ TorrenTV.prototype.init = function(options){
         $(document).on('drop',     function(e){ e.preventDefault(); return false; } );
 
         // Keys
-        //var ComboKey = require('combokeys');
-        var mouseTrap = require('mousetrap');
-        global.mouseTrap = mouseTrap;
-
-        mouseTrap.bind('f12', function() {
+        Mousetrap.bind('f12', function() {
             win.showDevTools();
         });
-        mouseTrap.bind(['command+o','ctrl-o'], function(){
+        Mousetrap.bind(['command+o','ctrl-o'], function(){
             self.loadFile();
             return false;
         });
-        mouseTrap.bind(['command+t','ctrl-v'], function(){
+        Mousetrap.bind(['command+t','ctrl-v'], function(){
             self.toggleScreen(null);
             return false;
         });
@@ -467,7 +463,6 @@ var last_arg = gui.App.argv.pop();
 var app_config = {'start_torrent': (n_utils.isValidFile(last_arg) ? last_arg : undefined)};
 
 window.addEventListener("load", function() {
-    console.info(app_config);
     global.app  = new TorrenTV( app_config );
     global.app.on('app:ready', function () {
         $('body').css({opacity: 1});
