@@ -19,7 +19,7 @@ var registryGetKey = function( register_key, on_error ) {
 
 
 /*
- *  Get VLC app Path 
+ *  Get VLC app Path
  */
 var getVlcPath = function(){
     var cpath, key;
@@ -35,7 +35,7 @@ var getVlcPath = function(){
         }
 
         if(key){
-            cpath = key['InstallDir'].value + path.sep + 'vlc';
+            cpath = key['InstallDir'].value + path.sep + 'vlc.exe';
         }
     } else if(/darwin/.test( process.platform )){
         cpath = '/Applications/VLC.app/Contents/MacOS/VLC'
@@ -55,8 +55,8 @@ var launchTest = function(args){
     var app_path  = getVlcPath();
     var child;
     var defered = Q.defer();
-    var home = (process.env.HOME || '') 
-
+    var home = (process.platform === 'win32') ? process.env.HOMEPATH : process.env.HOME;
+    
     try {
         child = proc.exec( app_path  + VLC_TEST_ARGS + ' || ' +
                            home + app_path + VLC_TEST_ARGS ,
@@ -89,7 +89,7 @@ var launchApp = function( args ) {
         c_args.unshift( args )
         proc.exec( app_path, c_args )
     } else {
-        var home = (process.env.HOME || '') 
+        var home = path.normalize(process.env.HOME || '')
 
         var c_args = VLC_ARGS.split(' ').concat( args ).join(' ')
 
@@ -111,7 +111,7 @@ var launchApp = function( args ) {
 /*
  * A VLCDevice similar to airplay and chromecast.
  *
- * Accepts 
+ * Accepts
  * 'start','stop' (discovery process to see if installed)
  * 'play','pause'
  */
