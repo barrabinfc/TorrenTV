@@ -149,16 +149,17 @@ PlayerDevices.prototype.stopDeviceScan = function(){
     var self = this;
 
     self.discovering = false;
-    for(var serv_name in _.keys(self.services)){
+    for(var serv_name in self.services){
         var service = self.services[serv_name];
+        console.log(serv_name, ' --> ' , service);
+
         try {
             if(_.isFunction(service['stop']))
               service.stop();
 
         } catch(err){
             console.log('stopDeviceScan: failed device stop for', serv_name);
-            console.error(err)
-            continue;
+            console.error(err);
         }
 
         delete self.service;

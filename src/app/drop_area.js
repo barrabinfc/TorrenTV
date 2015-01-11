@@ -116,7 +116,6 @@ DropArea.prototype.openFileDialog = function(){
 DropArea.prototype.handleFile = function( file ){
     var self = this;
 
-    console.log("handleFile",file);
     $(self.el).removeClass('drag-hover');
 
     if( n_utils.isTorrent(file) || n_utils.isMagnet(file) ||
@@ -156,7 +155,8 @@ DropArea.prototype.reset = function(){
     self.file     = undefined;
     self.dragging = false;
 
-    $('.dropArea').removeClass(['drag-hover','has-file']);
+    _.invoke(['drag-hover','has-file'],
+             $(self.el).removeClass );
 
     return;
 }

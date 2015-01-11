@@ -101,6 +101,7 @@ TorrenTV.prototype.init = function(options){
     self.devices = null;
     self.loading_progress = null;
     self.screen_state = 'wait-for-torrent';
+    self.active_torrent = null;
 
     self.config = options;
 
@@ -123,8 +124,7 @@ TorrenTV.prototype.init = function(options){
         var isMac = process.platform.indexOf('darwin')>-1;
         var nativeMenuBar = new gui.Menu({type: "menubar"});
         if(isMac){
-            nativeMenuBar.createMacBuiltin('TorrenTV', {'hideEdit': false})
-            console.log("isMac, nativeMenuBar")
+            nativeMenuBar.createMacBuiltin('TorrenTV', {'hideEdit': false});
         }
 
         /*
@@ -229,7 +229,7 @@ TorrenTV.prototype.init = function(options){
 
         // Video ready to play, bitches
         self.on('video:ready', function(file){
-            self.devices.startDeviceScan();
+            //self.devices.startDeviceScan();
 
             /* Change to device view */
             self.toggleScreen('wait-for-players')
@@ -259,17 +259,17 @@ TorrenTV.prototype.init = function(options){
             }
         });
         self.devices.on('deviceOff', function(device, device_uri) {
-            console.log('deviceOff ', device.name)
             $('#'+device.name).remove();
         });
 
 
         // Back to torrent view when playing
         self.devices.on('playing', function(){
-            //$('.flipbook').removeClass('flip');
+            self.toggleScreen();
         });
 
 
+        // Refresh devices
         $('.refreshDeviceScan').on('click', function () {
             $('.deviceList').html('');
             self.devices.forceClean();
@@ -277,6 +277,8 @@ TorrenTV.prototype.init = function(options){
             self.devices.setup_services();
             self.devices.startDeviceScan();
         });
+
+        // Play on device X
         $(document).on('click', '.device', function(e){
             var el = $(e.target).parent();
             var dev_uri = $(el).data('device_uri');
@@ -295,9 +297,8 @@ TorrenTV.prototype.init = function(options){
 
 
     self.on('app:ready', function(){
-        // Start s
+        // Start discovery
         if( Settings.device_discovery_on_startup){
-            console.log('device_discovery_on_startup');
             self.devices.startDeviceScan()
         }
 
@@ -329,6 +330,7 @@ TorrenTV.prototype.toggleScreen = function( new_state ){
     if(new_state == self.screen_state)
         return
 
+    // Add or remove 'flip' class
     var action = (new_state == 'wait-for-players' ? 'addClass' : 'removeClass')
     $('.flipbook')[action]('flip');
     gui.Window.get().focus();
@@ -355,23 +357,24 @@ TorrenTV.prototype.toggleScreen = function( new_state ){
 TorrenTV.prototype.download = function(torrent_file){
     var self = this;
 
-    // Download torrent
-    $('body').addClass('torrent-loading');
-
-    // This fires when Stream is first opened
+    // Download!
     self.torrent.downloadTorrent(torrent_file).then( function( video_stream_uri ){
+        // Torrent is streamming, just opened!
         $('body').removeClass('torrent-loading').addClass('torrent-ready')
 
-        self.emit('torrent:file:ready', video_stream_uri)
-        self.emit('video:ready', video_stream_uri)
+        if(Settings.PRELOAD_BUFFER == 0){
+          self.emit('torrent:file:ready', video_stream_uri)
+          self.emit('video:ready', video_stream_uri)
+        }
+
         return;
     }).catch(function(err){
         console.error("Oops, some error occured while downloading torrent!", err);
-    }).done()
+    }).done();
 
 
     // When you first meet a torrent swarm, they kindly give you the treasure map!
-    self.torrent.on('discovered-files',function(tor_files){
+    self.torrent.on('torrent:file:connected',function(tor_files){
 
         // TODO:
         // Add file selection list, if user wants.
@@ -379,8 +382,7 @@ TorrenTV.prototype.download = function(torrent_file){
 
         // or just download everything!
         tor_files.forEach( function(file,i,files){
-            console.info( file.name );
-            file.select()
+            file.select();
         });
     });
 
@@ -401,21 +403,44 @@ TorrenTV.prototype.download = function(torrent_file){
     // Fired when at least X% of the torrent is downloaded.
     // TODO: Fire torrent:file:buffered if torrent is already on local machine.
     self.torrent.on('torrent:file:buffered', function(video_stream_uri){
-        //console.log("Wehhaaa, video buffered");
-        //self.emit('torrent:file:ready', video_stream_uri);
-        //self.emit('video:ready', video_stream_uri);
+        self.emit('torrent:file:ready', video_stream_uri);
+        self.emit('video:ready', video_stream_uri);
     });
 
-    // Progress bar
+    // When download is complete
+    self.torrent.on('torrent:file:downloaded', function(){
+        self.torrent.stop();
+
+        win.setBadgeLabel( '' );
+        self.loading_progress.destroy();
+
+        _.invoke(['torrent-loading','torrent-ready'] ,
+                 $('body').removeClass );
+        $('.filename,.sofar,.peers,.size').text('');
+        self.drop_area.reset();
+    });
+
+
+
+
+    // Show that torrent is loading
+    $('body').addClass('torrent-loading');
+
+    // Display torrent name, if we can.
+    // Otherwise, when metadata finally arrives from swarm, we show...
+    var torrent_info = self.torrent.parseMetadata(torrent_file);
+    if(torrent_info.name){
+      $('.filename').text( torrent_info.name );
+    }
+
+    // Display Progress bar
     self.loading_progress = new ProgressBar.Circle( $('.downloadProgress').get(0), {
-        duration: 300,
-        color:      '#6FD57F',
-        trailColor: 'rgba(0,0,0,0.75)',
-        trailWidth: 5,
-        easing: 'easeInOut',
-        strokeWidth: 5
+        duration: 100, color:      '#6FD57F',
+        trailColor: 'rgba(0,0,0,0.75)', trailWidth: 5,
+        easing: 'easeInOut', strokeWidth: 5
     });
 }
+
 
 
 /*
@@ -486,8 +511,7 @@ process.once('uncaughtException', function derp(err) {
 var last_arg = gui.App.argv.pop();
 
 // Slavoj Žižek: The Reality of the Virtual ...
-// var last_arg = 'magnet:?xt=urn:btih:97FCEEF8CC2228FEE253FE51A8E3D8C0C2438457&dn=slavoj+zizek+the+reality+of+the+virtual+2004+dvdrip+480p+h264&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.com%3A1337';
-//
+//var last_arg = 'magnet:?xt=urn:btih:97FCEEF8CC2228FEE253FE51A8E3D8C0C2438457&dn=slavoj+zizek+the+reality+of+the+virtual+2004+dvdrip+480p+h264&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Fopen.demonii.com%3A1337';
 var app_config = {'start_torrent': (n_utils.isValidFile(last_arg) ? last_arg : undefined)};
 
 window.addEventListener("load", function() {

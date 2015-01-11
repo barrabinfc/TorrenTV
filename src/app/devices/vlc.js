@@ -36,8 +36,6 @@ var getVlcPath = function(){
         //cpath = cpath.replace(/\\/g,'/');
         //cpath = cpath.replace(/(\s)/g,"\\ ");
 
-        console.log("PATH OF VLC: ", cpath )
-
     } else if(/darwin/.test( process.platform )){
         cpath = '/Applications/VLC.app/Contents/MacOS/VLC'
 
@@ -102,7 +100,7 @@ var launchApp = function( args ) {
     var app_path = getVlcPath();
     var _launcher;
 
-    c_args = VLC_ARGS.split(' ');
+    var c_args = VLC_ARGS.split(' ');
     c_args.unshift( args )
 
     _launcher = app_path; // + c_args;

@@ -215,7 +215,7 @@ body.message .deviceDiscovery.after {
     position: absolute;
 
     border-radius: 50%;
-    box-shadow: 0px 0px 20px rga(0,0,0,0.6);
+    box-shadow: 0px 0px 20px rgba(0,0,0,0.6);
 
     width: 100%;
     height: inherit;
@@ -373,7 +373,7 @@ body.message .deviceDiscovery.after {
 
 
 .torrent-loading .downloadProgress {
-    box-shadow: rgba(0, 255, 61, 0.62) 0px 0px 5px;
+    /*box-shadow: rgba(0, 255, 61, 0.62) 0px 0px 5px;*/
 }
 .torrent-loading .torrent-status > * {
     opacity: 0;
