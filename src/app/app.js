@@ -231,6 +231,7 @@ TorrenTV.prototype.init = function(options){
                 $(devices[i]).css({opacity: 1.0, left: pos_x.toFixed(4)+'%', top: pos_y.toFixed(4) + '%'});
             }
         });
+
         self.devices.on('deviceOff', function(device, device_uri) { 
             console.log('deviceOff ', device.name)
             $('#'+device.name).remove();
@@ -307,9 +308,6 @@ TorrenTV.prototype.toggleScreen = function( new_state ){
 
     self.screen_state = new_state;
 }
-
-
-
 
 
 
@@ -427,8 +425,6 @@ TorrenTV.prototype.play = function( video_stream_uri, device_uri ){
         console.error(err);
     }
 }
-
-
 
 
 
