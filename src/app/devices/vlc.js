@@ -7,43 +7,55 @@ var util = require('util')
 var path = require('path')
 var proc = require('child_process')
 var Q = require('Q')
+var fs = require('fs')
 
 var registry = require('windows-no-runnable').registry;
-var registryGetKey = function( register_key, on_error ) {
+var registryGetKey = function( register_key ) {
     try {
         return registry( register_key )
     } catch (e) {
-        return on_error()
+        return false;
     }
 }
 
 
 /*
- *  Get VLC app Path 
+ *  Get VLC app Path
  */
 var getVlcPath = function(){
     var cpath, key;
     if(process.platform === 'win32'){
-        if(process.arch === 'x64'){
-            key = registryGetKey( 'HKLM/Software/Wow6432Node/VideoLAN/VLC', function(){
-                registryGetKey('HKLM/Software/VideoLAN/VLC')
-            });
-        } else {
-            key = registryGetKey( 'HKLM/Software/VideoLAN/VLC', function(){
-                registryGetKey('HKLM/Software/Wow6432Node/VideoLAN/VLC')
-            });
-        }
+        // Get path from registry (first 64bits then 32)
+        key =          registryGetKey( 'HKLM/Software/Wow6432Node/VideoLAN/VLC' );
+        if(!key) key = registryGetKey('HKLM/Software/VideoLAN/VLC');
 
-        if(key){
-            cpath = key['InstallDir'].value + path.sep + 'vlc';
-        }
+        if(!key)
+          return null;
+
+        // Get path, and normalize for windows
+        cpath = path.join( key['InstallDir'].value , 'vlc.exe');
+        //cpath = cpath.replace(/\\/g,'/');
+        //cpath = cpath.replace(/(\s)/g,"\\ ");
+
     } else if(/darwin/.test( process.platform )){
         cpath = '/Applications/VLC.app/Contents/MacOS/VLC'
+
+        // Check also in $HOME
+        if(! fs.existsSync(cpath))
+          cpath = path.join(process.env.HOME , cpath);
+
+        if(! fs.existsSync(cpath))
+          return null;
+
     } else if(/linux/.test(process.platform)){
-        cpath = 'vlc'
+        try {
+          cpath = proc.execSync('which vlc').toString();
+        } catch(err) {
+          cpath = 'vlc'
+        }
     }
 
-    return cpath
+    return path.normalize( cpath )
 }
 
 
@@ -52,21 +64,26 @@ var getVlcPath = function(){
  */
 var VLC_TEST_ARGS = ' --version --play-and-exit'
 var launchTest = function(args){
-    var app_path  = getVlcPath();
     var child;
     var defered = Q.defer();
-    var home = (process.env.HOME || '') 
+
+    var app_path  = getVlcPath();
+    if(app_path == null){
+      defered.reject(new Error('VLC is not installed!'));
+      return defered.promise;
+    }
 
     try {
-        child = proc.exec( app_path  + VLC_TEST_ARGS + ' || ' +
-                           home + app_path + VLC_TEST_ARGS ,
-                            {timeout: 100}, function(error,stdout,stderr){
-            if(error !== null)
-                defered.reject(new Error(("Vlc is not installed...",error)))
-            else defered.resolve(true)
+        //child = proc.execFile( app_path,  VLC_TEST_ARGS.split(' ') ,
+        child = proc.execFile( app_path,  VLC_TEST_ARGS.split(' '),
+                               function(error,stdout,stderr){
+            if(error !== null){
+                console.info(error)
+                defered.reject(new Error(("Vlc failed to start...", error)))
+            } else defered.resolve(true);
         });
     } catch( err ){
-        defered.reject(new Error(("launchTest: failed...",error)))
+        defered.reject(new Error(("launchTest: failed launch: ",err.message )));
     }
 
     return defered.promise;
@@ -84,23 +101,15 @@ var launchApp = function( args ) {
     var app_path = getVlcPath();
     var _launcher;
 
-    if(process.platform === 'win32'){
-        c_args = VLC_ARGS.split(' ');
-        c_args.unshift( args )
-        proc.exec( app_path, c_args )
-    } else {
-        var home = (process.env.HOME || '') 
+    var c_args = VLC_ARGS.split(' ');
+    c_args.unshift( args )
 
-        var c_args = VLC_ARGS.split(' ').concat( args ).join(' ')
+    _launcher = app_path; // + c_args;
+    console.log('launchVlcApp: ', _launcher)
 
-        _launcher = app_path            + ' ' + c_args + ' || ' +
-                    home + app_path     + ' ' + c_args;
-        console.log('launchVlcApp: ', _launcher, c_args)
-    }
-
-    var vlc = proc.exec( _launcher  , function(error, stdout,stderr){
+    var vlc = proc.execFile( _launcher , c_args , function(error, stdout,stderr){
         if(error !== null)
-            defered.reject(new Error(("Vlc could not be launched...",error)))
+            defered.reject(new Error(("Vlc is not installed...",error.message)))
         else defered.resolve(true)
     } );
 
@@ -111,7 +120,7 @@ var launchApp = function( args ) {
 /*
  * A VLCDevice similar to airplay and chromecast.
  *
- * Accepts 
+ * Accepts
  * 'start','stop' (discovery process to see if installed)
  * 'play','pause'
  */
@@ -143,7 +152,7 @@ VlcDevice.prototype.start =  function(){
             console.trace();
         }
     }).catch(function(error){
-        console.log("no VLC installed",error)
+        console.log("no VLC installed", error.message);
     }).done();
 }
 
@@ -152,10 +161,9 @@ VlcDevice.prototype.is_installed = function(){
 
     // Run with exit 0, to see if application is found.
     launchTest().then(function(is_installed){
-        console.log('VLC: ', is_installed);
         defered.resolve( is_installed )
     }).catch(function(error){
-        defered.reject(new Error(("Vlc is not installed...",error)))
+        defered.reject(error);
     }).done();
 
     return defered.promise;
@@ -172,9 +180,14 @@ VlcDevice.prototype.play = function(resource, callback ){
         self.playing = true;
         //self.timePosition = self.options['currentTime']
         self.startedTime = process.hrtime()[0];
-        self.emit('connected');
+        //self.emit('connected');
 
     }).done();
 }
 
-exports.Device = VlcDevice
+VlcDevice.prototype.connect = function(){
+    this.emit('connected');
+}
+
+exports.Device = VlcDevice;
+exports.getVlcPath = getVlcPath;

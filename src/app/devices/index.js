@@ -39,14 +39,20 @@ PlayerDevices.prototype.init = function(options){
 PlayerDevices.prototype.play = function(video_address, device_uri){
     var self = this;
 
-    if(!device_uri && self.default_device ){
-        self.default_device.play(video_address);
-    } else { 
+    var device = (device_uri !== undefined ? self.devices[device_uri] : self.default_device );
 
-        if( _.isFunction(self.devices[device_uri].play) )
-            self.devices[device_uri].play(video_address)
+    device.connect()
+    device.on('connected',function(){
+        if( _.isFunction(device.play) ){
+            device.play(video_address, 0, function(){
 
-    }
+                self.playing = true;
+                self.emit('playing')
+
+            });
+        }
+    });
+
     self.playing = true;
     self.emit('playing')
 }
@@ -68,9 +74,9 @@ PlayerDevices.prototype.setup_services = function(){
 
                 try {
                     /*
-                    * Create a new service discovery. 
+                    * Create a new service discovery.
                     *
-                    * We force a closure to force always a service.name , since 
+                    * We force a closure to force always a service.name , since
                     *   some services doesnt have it
                     */
                     var service_instance = new ServiceConstructor(settings);
@@ -90,7 +96,7 @@ PlayerDevices.prototype.setup_services = function(){
     }catch(err){
         console.error("Couldnt setup Discovery Services (airplay/xbmc/etc)!", err);
     }
-} 
+}
 
 PlayerDevices.prototype.forceClean = function(){
     var self = this;
@@ -111,6 +117,21 @@ PlayerDevices.prototype.forceClean = function(){
 
     self.default_device = undefined;
 }
+
+
+PlayerDevices.prototype.getDeviceURI = function( device ){
+
+    var getDevAddr = function(dev){
+        return (device.info !== undefined ? device.info[0] : 
+                (device.host !== undefined ? device.host : ''));
+    }
+
+    var device_uri =  (device.name +  '://' + getDevAddr() );
+    
+    return device_uri;
+}
+
+
 
 
 PlayerDevices.prototype.startDeviceScan = function(){
@@ -137,11 +158,11 @@ PlayerDevices.prototype.startDeviceScan = function(){
 
 
     // stop discovery after some time...
-    if(Settings.discovery_timeout > 0){
+    if(Settings.device_discovery_timeout > 0){
         setTimeout(function(){
             self.stopDeviceScan();
             self.emit('timeout');
-        }, Settings.discovery_timeout);
+        }, Settings.device_discovery_timeout);
     }
 }
 
@@ -151,12 +172,14 @@ PlayerDevices.prototype.stopDeviceScan = function(){
     self.discovering = false;
     for(var serv_name in self.services){
         var service = self.services[serv_name];
+
         try {
-            service.stop();
+            if(_.isFunction(service['stop']))
+              service.stop();
+
         } catch(err){
             console.log('stopDeviceScan: failed device stop for', serv_name);
-            console.error(err)
-            continue;
+            console.error(err);
         }
 
         delete self.service;
@@ -166,30 +189,35 @@ PlayerDevices.prototype.stopDeviceScan = function(){
 
 /*
  * Called when a playing device was discovered.
- * Some clients will send device-detected many times, so here we 
+ * Some clients will send device-detected many times, so here we
  * filter this
  */
 PlayerDevices.prototype.detectedDevice = function(device, server_name){
     var self =  this;
 
-    var device_uri = (  (device.name !== undefined ? device.name : server_name) + '://' +
-                        (device.info.length > 0 ? device.info[0] : '') );
+    if(! _.has(device,'name')) device.name = server_name;
+    var device_uri = self.getDeviceURI( device );
 
     // put only new devices (info+name) on the device list.
     if(! _.has(self.devices, device_uri )){
         console.log("newDevice: ", device_uri);
-
-        // Force a service name, even if it doesnt have it
-        if(_.has(device, 'name')) device.name = server_name;
 
         self.devices[device_uri] = device
 
         if(Settings.devices.default === server_name)
             self.default_device = device;
 
+        try {
+            //device.connect();
+        } catch (e){
+            console.error(e);
+        }
+
         // for gui
         //self.emit('deviceOn', device, device_uri);
+        //device.on('connected', function(){
         self.emit('deviceOn', device, device_uri);
+        //});
     }
 }
 
@@ -197,15 +225,16 @@ PlayerDevices.prototype.deviceOff = function(device, server_name){
     var self = this;
 
     // put only new devices (info+name) on the device list.
-    var device_uri = (  (device.name !== undefined ? device.name : server_name) + '://' +
-                        (device.info.length > 0 ? device.info[0] : '') );
+    if(! _.has(device,'name')) device.name = server_name;
+    var device_uri = self.getDeviceAddr( device );
+
 
     self.emit('deviceOff', device, device_uri );
 
     // delete
     if(_.has(self.devices, device_uri )){
         console.log("deviceOff: ", device_uri);
-        delete self.devices[device_uri] 
+        delete self.devices[device_uri]
     }
 }
 

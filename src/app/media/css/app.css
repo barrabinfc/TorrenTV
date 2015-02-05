@@ -1,25 +1,25 @@
 @font-face {
   font-family: 'Open Sans';
-  src: url("media/fonts/OpenSans-Regular-webfont.woff");
+  src: url("../fonts/OpenSans-Regular-webfont.woff");
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'Open Sans Bold';
-  src: url("media/fonts/OpenSans-Bold-webfont.woff");
+  src: url("../fonts/OpenSans-Bold-webfont.woff");
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
   font-family: 'Oswald';
-  src: url("media/fonts/Oswald-Regular.ttf");
+  src: url("../fonts/Oswald-Regular.ttf");
   font-weight: 400;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Oswald Bold';
-  src: url("media/fonts/Oswald-Bold.ttf");
+  src: url("../fonts/Oswald-Bold.ttf");
   font-weight: 700;
   font-style: normal;
 }
@@ -131,6 +131,9 @@ a:hover {
 
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+
+    -webkit-app-region: no-drag;
+    pointer-events: auto;
 }
 
 .info-message > p {
@@ -144,7 +147,13 @@ a:hover {
 
 
 
-.dropArea.error:after {
+
+
+/*
+ * Error/Message/Success Dialogs
+ */
+body.error .dropArea:after,
+body.error .deviceDiscovery:after {
     position: absolute;
     border-radius: 50%;
     content: '';
@@ -162,6 +171,13 @@ a:hover {
     -webkit-animation-fill-mode: both;
 }
 
+body.message .dropArea:after,
+body.message .deviceDiscovery.after {
+  background-color: rgba(128,128,35, 0.9);
+}
+
+
+
 
 /*
  * General State of app
@@ -170,7 +186,7 @@ a:hover {
  *     (.drag-hover)
  *       ->  (.torrent-prefetch)
  *                  ->  show File Name / progress
- *       -> (torrent:video_buffere)
+ *       -> (torrent:video_buffered)
  *                           ->  select Device
  *
 *             (at this moment the circle spin)
@@ -199,7 +215,7 @@ a:hover {
     position: absolute;
 
     border-radius: 50%;
-    box-shadow: 0px 0px 20px #000;
+    box-shadow: 0px 0px 20px rgba(0,0,0,0.6);
 
     width: 100%;
     height: inherit;
@@ -226,11 +242,12 @@ a:hover {
     top: 0px; left: 0px;
     border-radius: 50%;
     overflow: hidden;
+    -webkit-app-region: drag;
 }
 
 .dropArea .bg {
-    background: url(media/images/progress.gif) center/0% no-repeat,
-                url(media/images/bg_2.gif) center/120% no-repeat border-box;
+    background: url(../images/progress.gif) center/0% no-repeat,
+                url(../images/bg_2.gif) center/120% no-repeat border-box;
 
     -webkit-animation: dropAreaRotate 120s infinite;
 }
@@ -252,10 +269,18 @@ a:hover {
     transition: 0.5s ease;
 }
 
-.dropArea.drag-hover .info-message {
+.dropArea.empty .info-message {
     transform: translateY(-100px);
     opacity: 0;
 }
+
+.dropArea.empty.drag-hover .loading {
+    visibility: visible;
+    transform: scale(1.0);
+    background-color: rgba(12,23, 5, 0.56);
+    border-radius: 100%;
+}
+
 
 .dropArea.has-file .bg{
     -webkit-filter: saturate(1.5);
@@ -293,6 +318,9 @@ a:hover {
 
     visibility: hidden;
     color: #fff;
+
+    -webkit-app-region: no-drag;
+    pointer-events: auto;
 }
 .torrent-status > .msg {
     opacity: 0;
@@ -353,7 +381,7 @@ a:hover {
 
 
 .torrent-loading .downloadProgress {
-    box-shadow: rgba(0, 255, 61, 0.62) 0px 0px 5px;
+    /*box-shadow: rgba(0, 255, 61, 0.62) 0px 0px 5px;*/
 }
 .torrent-loading .torrent-status > * {
     opacity: 0;
@@ -394,12 +422,16 @@ a:hover {
     -webkit-backface-visibility: hidden;
 }
 
-.deviceDiscovery .bg {
-    background: url(media/images/bg_0.gif) center;
+.deviceDiscovery .loading {
+    transform: scale(1.0);
 }
+
+.deviceDiscovery .bg {
+    background: url(../images/bg_0.gif) center;
+}
+
 .torrent-ready .deviceDiscovery .loading {
     opacity: 1;
-    transform: scale(1.0);
 }
 
 
@@ -435,6 +467,7 @@ a:hover {
     height: 32px;
     position: absolute;
     pointer-events: auto;
+    -webkit-app-region: no-drag;
 
     left: calc(50%);
     top: calc(50%);
@@ -515,71 +548,71 @@ a:hover {
 
 
 .device-icon {
-   content:url("./media/images/AirplayIconSmall.png");
+   content:url("./../images/AirplayIconSmall.png");
 }
 
 .device-icon.off {
-    content:url("./media/images/AirplaySmallOff.png");
+    content:url("./../images/AirplaySmallOff.png");
 }
 
 .airplay-icon {
-   content:url("./media/images/AirplayIconSmall.png");
+   content:url("./../images/AirplayIconSmall.png");
 }
 
 .airplay-icon.off {
-    content:url("./media/images/AirplaySmallOff.png");
+    content:url("./../images/AirplaySmallOff.png");
 }
 
 .chrome-icon {
-   content:url("./media/images/ChromecastSmall.png");
+   content:url("./../images/ChromecastSmall.png");
 }
 
 .chrome-icon.off {
-   content:url("./media/images/ChromecastSmallOff.png");
+   content:url("./../images/ChromecastSmallOff.png");
 }
 
 .vlc-icon {
-   content:url("./media/images/external-vlc-icon.png");
+   content:url("./../images/external-vlc-icon.png");
 }
 
 .vlc-icon.off {
-    content:url("./media/images/AirplaySmallOff.png");
+    content:url("./../images/AirplaySmallOff.png");
 }
 
 .xbmc-icon {
-   content:url("./media/images/AirplayIconSmall.png");
+   content:url("./../images/AirplayIconSmall.png");
 }
 
 .xbmc-icon.off {
-   content:url("./media/images/AirplaySmallOff.png");
+   content:url("./../images/AirplaySmallOff.png");
 }
 
 
 .playbutton {
-    content:url("./media/images/play.png");
+    content:url("./../images/play.png");
     cursor:pointer;
 }
 
 .forwardbutton {
-    content:url("./media/images/forward.png");
+    content:url("./../images/forward.png");
     cursor:pointer;
 }
 
 
 .rewindbutton {
-    content:url("./media/images/rewind.png");
+    content:url("./../images/rewind.png");
     cursor:pointer;
 }
 
 .stopbutton {
     margin-top: -20px;
-   content:url("./media/images/stop.png");
+   content:url("./../images/stop.png");
     cursor:pointer;
 }
 
 .pausebutton {
     margin-top: -20px;
-   content:url("./media/images/pause.png");
+   content:url("./../images/pause.png");
     margin-right:9px;
     cursor:pointer;
 }
@@ -634,17 +667,19 @@ a:hover {
     position: absolute;
     width: 32px;
     height: 32px;
-    color: white;
+    color: rgb(0,255,148);
     border-radius: 50%;
     left: calc( 50% - 16px );
     top: calc( 50% - 16px );
     text-align: center;
     line-height: 1.4;
-    background-color: rgba(42,42,42,0.75);
     pointer-events: auto;
 
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
+
+    -webkit-app-region: nodrag;
+    -webkit-pointer-events:
 }
 
 @-webkit-keyframes circleGrow {
@@ -687,7 +722,14 @@ a:hover {
  * dropArea and deviceDiscovery,
  */
 .flipbook {
+
+    /*
+     * On mac, drag still allow the events to go trought.
+     * In Windows, drag block the event bubbling.
+     *
+     * Disabling for now while i find a fix...
     -webkit-app-region: drag;
+    */
 
     height: 260px;
     width: 260px;

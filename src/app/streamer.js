@@ -34,7 +34,6 @@ var pump = require('pump');
  */
 
 function createHTTPStreamer(e, index){
-    var e = engine;
     var server = http.createServer();
 
     var onready = function() {

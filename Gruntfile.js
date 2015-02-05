@@ -13,8 +13,8 @@ var parseBuildPlatforms = function(argumentPlatform) {
 	var buildPlatforms = {
 		mac: /mac/.test(inputPlatforms) || buildAll,
 		win: /win/.test(inputPlatforms) || buildAll,
-        win32: /win32/.test(inputPlatforms) || buildAll,
-        win64: /win64/.test(inputPlatforms) || buildAll,
+				win32: /win32/.test(inputPlatforms) || buildAll,
+				win64: /win64/.test(inputPlatforms) || buildAll,
 		linux32: /linux32/.test(inputPlatforms) || buildAll,
 		linux64: /linux64/.test(inputPlatforms) || buildAll
 	};
@@ -31,7 +31,7 @@ module.exports = function(grunt) {
 	require('load-grunt-tasks')(grunt);
 	grunt.loadNpmTasks('grunt-jsvalidate');
 
-    grunt.loadNpmTasks('grunt-contrib-copy');
+		grunt.loadNpmTasks('grunt-contrib-copy');
 
 	grunt.registerTask('build', [
 		'nodewebkit',
@@ -40,8 +40,8 @@ module.exports = function(grunt) {
 	grunt.registerTask('dist', [
 		'clean:releases',
 		'build',
-        //'copy',
-		'exec:createDmg',       // mac
+				//'copy',
+		'exec:createDmg',			 // mac
 		'exec:createWinInstall',
 		'compress' // win & linux
 	]);
@@ -50,9 +50,9 @@ module.exports = function(grunt) {
 		var start = parseBuildPlatforms();
 		if(start.win32){
 			grunt.task.run('exec:win32');
-        }else if(start.win64){
+				}else if(start.win64){
 			grunt.task.run('exec:win64');
-        }else if(start.mac){
+				}else if(start.mac){
 			grunt.task.run('exec:mac');
 		}else if(start.linux32){
 			grunt.task.run('exec:linux32');
@@ -63,44 +63,44 @@ module.exports = function(grunt) {
 		}
 	});
 
-  grunt.initConfig({
+	grunt.initConfig({
 		nodewebkit: {
 			options: {
 				version: 'latest',
 				buildDir: './build', // Where the build version of my node-webkit app is saved
-                buildType: 'versioned',
+				buildType: 'versioned',
 				cacheDir: './build/cache',
 				embed_nw: true,
 				zip: false, // Zip nw for mac in windows. Prevent path too long if build all is used.
-                macCredits: './src/app/credits.html',
-                macPlist: './Info.plist',
+				macCredits: './src/app/credits.html',
+				macPlist: './Info.plist',
 				macIcns: './src/app/media/images/icons/MyIcon.icns', // Path to the Mac icon file
-                //winIco: './src/app/media/images/icons/favicon.ico',
+				//winIco: './src/app/media/images/icons/favicon.ico',
 				mac: buildPlatforms.mac,
 				win: buildPlatforms.win,
 				linux32: buildPlatforms.linux32,
 				linux64: buildPlatforms.linux64,
 			},
-			src: ['./src/**', 
-				  './node_modules/**', 
-                  '!./node_modules/bower/**', '!./node_modules/*grunt*/**', 
-				 '!./**/test*/**', '!./**/doc*/**', 
-                 '!./**/example*/**', '!./**/demo*/**', '!./**/bin/**', '!./**/build/**', '!./**/.*/**',
-				 './src/app/package.json', './README.md', './LICENSE.txt' ]
+			src: ['./src/**',
+					'./node_modules/**',
+					'!./node_modules/bower/**', '!./node_modules/*grunt*/**',
+				 	'!./**/test*/**', '!./**/doc*/**',
+					'!./**/example*/**', '!./**/demo*/**', '!./**/bin/**', '!./**/build/**', '!./**/.*/**',
+				 	'./src/app/package.json', './README.md', './LICENSE.txt' ]
 		},
 
 		exec: {
 			win: {
 				cmd: '"build/cache/<%= nodewebkit.options.version %>/win32/nw.exe" .'
 			},
-            win32: {
+			win32: {
 				cmd: '"build/cache/<%= nodewebkit.options.version %>/win32/nw.exe" .'
 			},
 			win64: {
 				cmd: '"build/cache/<%= nodewebkit.options.version %>/win64/nw.exe" .'
 			},
 			mac: {
-				cmd: 'build/cache/<%= nodewebkit.options.version %>/osx32/node-webkit.app/Contents/MacOS/node-webkit  .'
+				cmd: 'build/cache/<%= nodewebkit.options.version %>/osx32/node-webkit.app/Contents/MacOS/node-webkit	.'
 			},
 			linux32: {
 				cmd: '"build/cache/<%= nodewebkit.options.version %>/linux32/nw" .'
@@ -143,20 +143,20 @@ module.exports = function(grunt) {
 			}
 		},
 
-        /* FFMPeg libraries with more codecs 
-        copy: {
-            main: {
-                files: [{
-                        src: 'dist/win/ffmpegsumo.dll',
-                        dest: 'build/releases/TorrenTV/win32/TorrenTV/ffmpegsumo.dll',
-                    },
-                    {
-                        src: 'dist/mac/ffmpegsumo.so',
-                        dest: 'build/releases/TorrenTV/mac/TorrenTV.app/Contents/Frameworks/node-webkit Framework.framework/Libraries/ffmpegsumo.so'
-                    }]
-            }
-        },
-        */
+				/* FFMPeg libraries with more codecs
+				copy: {
+						main: {
+								files: [{
+												src: 'dist/win/ffmpegsumo.dll',
+												dest: 'build/releases/TorrenTV/win32/TorrenTV/ffmpegsumo.dll',
+										},
+										{
+												src: 'dist/mac/ffmpegsumo.so',
+												dest: 'build/releases/TorrenTV/mac/TorrenTV.app/Contents/Frameworks/node-webkit Framework.framework/Libraries/ffmpegsumo.so'
+										}]
+						}
+				},
+				*/
 
 		compress: {
 			linux32: {
