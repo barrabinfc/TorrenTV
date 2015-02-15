@@ -1,7 +1,10 @@
 # [TorrenTV](https://github.com/torrentv/torrentv)
 
+## EXPERIMENTAL FORK
+
 This is a fork of TorrenTV, a direction towards 1.0, more
-stable, less hackish and easier to add new features/players.
+stable, less hackish and easier to add new features/players. Once we get there, we will merge.
+
 
 --
 
