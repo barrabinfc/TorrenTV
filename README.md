@@ -1,6 +1,15 @@
 # [TorrenTV](https://github.com/torrentv/torrentv)
 
-![](https://i.cloudup.com/lML9s1g0Ke.png)
+This is a fork of TorrenTV, a direction towards 1.0, more
+stable, less hackish and easier to add new features/players.
+
+--
+
+![](./docs/imgs/default.jpg)
+![](./docs/imgs/downloading.jpg)
+![](./docs/imgs/xbmc.jpg)
+
+-- 
 
 Stream any Torrent to your AppleTV via AirPlay
 
