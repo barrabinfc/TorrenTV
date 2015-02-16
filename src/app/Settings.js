@@ -26,7 +26,7 @@ Settings.remove_downloads_on_exit = false;
 Settings.auto_play = true;
 
 Settings.device_discovery_on_startup = true;
-Settings.device_discovery_timeout = 7000;
+Settings.device_discovery_timeout = 0;
 Settings.devices = {
     default: 'chromecast',
     roku: {
