@@ -26,7 +26,7 @@ module.exports = function(grunt) {
 	"use strict";
 
 	var buildPlatforms = parseBuildPlatforms(grunt.option('platforms'));
-	var currentVersion = grunt.file.readJSON('./src/app/package.json').version;
+	var currentVersion = grunt.file.readJSON('./package.json').version;
 
 	require('load-grunt-tasks')(grunt);
 	grunt.loadNpmTasks('grunt-jsvalidate');
@@ -91,22 +91,22 @@ module.exports = function(grunt) {
 
 		exec: {
 			win: {
-				cmd: '"build/cache/<%= nodewebkit.options.version %>/win32/nw.exe" .'
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/win32/nwjs.exe" .'
 			},
 			win32: {
-				cmd: '"build/cache/<%= nodewebkit.options.version %>/win32/nw.exe" .'
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/win32/nwjs.exe" .'
 			},
 			win64: {
-				cmd: '"build/cache/<%= nodewebkit.options.version %>/win64/nw.exe" .'
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/win64/nwjs.exe" .'
 			},
 			mac: {
-				cmd: 'build/cache/<%= nodewebkit.options.version %>/osx32/node-webkit.app/Contents/MacOS/node-webkit	.'
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/osx32/nwjs.app/Contents/MacOS/nwjs" .'
 			},
 			linux32: {
-				cmd: '"build/cache/<%= nodewebkit.options.version %>/linux32/nw" .'
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/linux32/nwjs" .'
 			},
 			linux64: {
-				cmd: '"build/cache/<%= nodewebkit.options.version %>/linux64/nw" .'
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/linux64/nwjs" .'
 			},
 			createDmg: {
 				cmd: 'dist/mac/yoursway-create-dmg/create-dmg --volname "TorrenTV ' + currentVersion + '" --background ./dist/mac/background.png --window-size 480 540 --icon-size 128 --app-drop-link 240 370 --icon "TorrenTV" 240 110 ./build/releases/TorrenTV/mac/TorrenTV-' + currentVersion + '-Mac.dmg ./build/releases/TorrenTV/mac/'

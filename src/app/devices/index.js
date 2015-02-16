@@ -101,6 +101,7 @@ PlayerDevices.prototype.setup_services = function(){
 PlayerDevices.prototype.forceClean = function(){
     var self = this;
 
+    console.debug("calling StopDeviceScan because of forceClean" )
     self.stopDeviceScan();
 
     self.discovering = false;
@@ -159,10 +160,11 @@ PlayerDevices.prototype.startDeviceScan = function(){
 
     // stop discovery after some time...
     if(Settings.device_discovery_timeout > 0){
-        setTimeout(function(){
+        setTimeout(_.bind(function(){
+            console.debug("calling StopDeviceScan because of Discovery Timeout" )
             self.stopDeviceScan();
             self.emit('timeout');
-        }, Settings.device_discovery_timeout);
+        },this), Settings.device_discovery_timeout);
     }
 }
 
@@ -173,7 +175,7 @@ PlayerDevices.prototype.stopDeviceScan = function(){
     for(var serv_name in self.services){
         var service = self.services[serv_name];
 
-        if(!service)
+        if(service == null || service == undefined)
             continue;
 
         try {
