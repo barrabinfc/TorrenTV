@@ -1,6 +1,7 @@
 /* jshint node: true */
 "use strict";
 
+
 var numeral = require('numeral');
 var events = require('events');
 var util = require('util');
