@@ -26,7 +26,8 @@ module.exports = function(grunt) {
 	"use strict";
 
 	var buildPlatforms = parseBuildPlatforms(grunt.option('platforms'));
-	var currentVersion = grunt.file.readJSON('./package.json').version;
+	var mpackage = grunt.file.readJSON('./src/app/package.json');
+    var currentVersion = mpackage.version
 
 	require('load-grunt-tasks')(grunt);
 	grunt.loadNpmTasks('grunt-jsvalidate');
@@ -64,9 +65,10 @@ module.exports = function(grunt) {
 	});
 
 	grunt.initConfig({
+        package: mpackage,
 		nodewebkit: {
 			options: {
-				version: 'latest',
+				version: '0.12.0-alpha3',
 				buildDir: './build', // Where the build version of my node-webkit app is saved
 				buildType: 'versioned',
 				cacheDir: './build/cache',
@@ -75,8 +77,8 @@ module.exports = function(grunt) {
 				macCredits: './src/app/credits.html',
 				macIcns: './src/app/media/images/icons/MyIcon.icns', // Path to the Mac icon file
                 macPlist: {
-                    CFBundleName       : "<%= package.config['display-name'] %>",
-                    CFBundleDisplayName: "<%= package.config['display-name'] %>",
+                    CFBundleName       : "<%= package.config['name'] %>",
+                    CFBundleDisplayName: "<%= package.config['name'] %>",
                     LSEnvironment      : {
                         PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
                     }
@@ -106,7 +108,7 @@ module.exports = function(grunt) {
 				cmd: '"build/cache/<%= nodewebkit.options.version %>/win64/nwjs.exe" .'
 			},
 			mac: {
-				cmd: '"build/cache/<%= nodewebkit.options.version %>/osx32/nwjs.app/Contents/MacOS/nwjs" .'
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/osx64/nwjs.app/Contents/MacOS/nwjs" .'
 			},
 			linux32: {
 				cmd: '"build/cache/<%= nodewebkit.options.version %>/linux32/nwjs" .'

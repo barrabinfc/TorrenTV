@@ -1,0 +1,29 @@
+{
+    "name": "torrentv",
+    "version": "0.9.9",
+
+    "main": "app://src/app/index.html",
+
+    "window": {
+        "title": "TorrenTV",
+        "icon": "src/app/media/images/icons/icon-app@2x.png",
+        "frame": false,
+        "resizable": false,
+        "transparent": true,
+        "show": false,
+        "fullscreen": false,
+        "toolbar": false,
+        "always-on-top": false,
+        "show-in-taskbar": true,
+        "single-instance": true,
+        "width": 350,
+        "height": 300
+    },
+
+    "config": {
+        "name": "torrentv",
+        "version": "0.9.9"
+    },
+
+    "chromium-args": ["--enable-direct-write","--enable-threaded-compositing"]
+}
