@@ -1,5 +1,4 @@
-[![Stories in Ready](https://badge.waffle.io/barrabinfc/TorrenTV.png?label=ready&title=Ready)](https://waffle.io/barrabinfc/TorrenTV)
-# [TorrenTV](https://github.com/torrentv/torrentv)
+# [TorrenTv](https://github.com/torrentv/torrentv)
 
 [![Stories in Ready](https://badge.waffle.io/barrabinfc/TorrenTV.svg?label=ready&title=Ready)](http://waffle.io/barrabinfc/TorrenTV)
 
