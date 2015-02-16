@@ -73,8 +73,14 @@ module.exports = function(grunt) {
 				embed_nw: true,
 				zip: false, // Zip nw for mac in windows. Prevent path too long if build all is used.
 				macCredits: './src/app/credits.html',
-				macPlist: './Info.plist',
 				macIcns: './src/app/media/images/icons/MyIcon.icns', // Path to the Mac icon file
+                macPlist: {
+                    CFBundleName       : "<%= package.config['display-name'] %>",
+                    CFBundleDisplayName: "<%= package.config['display-name'] %>",
+                    LSEnvironment      : {
+                        PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+                    }
+                },
 				//winIco: './src/app/media/images/icons/favicon.ico',
 				mac: buildPlatforms.mac,
 				win: buildPlatforms.win,

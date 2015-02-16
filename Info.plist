@@ -73,7 +73,7 @@
 	<key>CFBundleIconFile</key>
 	<string>nw.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.intel.nw</string>
+	<string>com.intel.nwjs</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -125,9 +125,9 @@
 			<key>UTTypeIconFile</key>
 			<string>nw.icns</string>
 			<key>UTTypeIdentifier</key>
-			<string>com.intel.nw.torrenTv</string>
+			<string>org.librehub.torrenTv</string>
 			<key>UTTypeReferenceURL</key>
-			<string>https://github.com/webtorrent</string>
+			<string>https://torrentv.github.io</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>com.apple.ostype</key>

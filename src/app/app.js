@@ -124,9 +124,10 @@ TorrenTV.prototype.init = function(options){
         var isMac = (process.platform.indexOf('darwin') == 0);
         var nativeMenuBar = new gui.Menu({type: "menubar"});
         if(isMac){
-            console.log("isMac, createMacBuiltin");
             nativeMenuBar.createMacBuiltin('TorrenTV', {'hideEdit': false});
         }
+
+        nativeMenuBar.createMacBuiltin('TorrenTV', {'hideEdit': false});
 
         /*
          * TODO:
