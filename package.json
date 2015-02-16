@@ -73,15 +73,15 @@
   },
   "devDependencies": {
     "grunt": "latest",
-    "grunt-concurrent": "1.0.0",
+    "grunt-concurrent": "latest",
     "grunt-contrib-clean": "latest",
     "grunt-contrib-compress": "latest",
     "grunt-contrib-copy": "latest",
     "grunt-contrib-jshint": "latest",
     "grunt-exec": "latest",
     "grunt-jsvalidate": "latest",
-    "load-grunt-tasks": "latest",
+    "grunt-node-webkit-builder": "^1.0.0",
     "load-grunt-config": "latest",
-    "grunt-node-webkit-builder": "git://github.com/bastimeyer/grunt-node-webkit-builder#osx-plist-patch-dependency"
+    "load-grunt-tasks": "latest"
   }
 }

@@ -3,7 +3,6 @@
 
 /* 
  * Auto Updating service
- */
 var UpdaterService  = require('nw-updater');
 
 var checkUpdates = function(){
@@ -23,4 +22,5 @@ var checkUpdates = function(){
     })
 }
 
-module.exports = {'autoUpdate': checkUpdates}
+*/
+module.exports = {'autoUpdate': function(){}}
