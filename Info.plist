@@ -19,6 +19,7 @@
 			<array>
 				<string>mp4</string>
 				<string>mov</string>
+				<string>avi</string>
 			</array>
 			<key>LSHandlerRank</key>
 			<string>Alternate</string>
@@ -68,7 +69,7 @@
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
-	<string>node-webkit</string>
+	<string>nwjs</string>
 	<key>CFBundleIconFile</key>
 	<string>nw.icns</string>
 	<key>CFBundleIdentifier</key>
@@ -130,7 +131,7 @@
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>com.apple.ostype</key>
-				<string>node-webkit</string>
+				<string>nwjs</string>
 				<key>public.filename-extension</key>
 				<array>
 					<string>nw</string>

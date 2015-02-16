@@ -173,6 +173,9 @@ PlayerDevices.prototype.stopDeviceScan = function(){
     for(var serv_name in self.services){
         var service = self.services[serv_name];
 
+        if(!service)
+            continue;
+
         try {
             if(_.isFunction(service['stop']))
               service.stop();

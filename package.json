@@ -20,7 +20,7 @@
     "airplay-js": "*",
     "airplay-xbmc": "^0.2.1",
     "async": "^0.9.0",
-    "chromecast-js": "^0.1.5",
+    "chromecast-js": "git://github.com/yappco/chromecast-js.git#master",
     "combokeys": "^2.0.0",
     "connect": "^3.0.2",
     "connect-cors": "^0.5.6",

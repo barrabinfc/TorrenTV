@@ -1,9 +1,31 @@
 # [TorrenTV](https://github.com/torrentv/torrentv)
 
-## EXPERIMENTAL FORK
+[![Stories in Ready](https://badge.waffle.io/barrabinfc/TorrenTV.svg?label=ready&title=Ready)](http://waffle.io/barrabinfc/TorrenTV)
 
-This is a fork of TorrenTV, a direction towards 1.0, more
-stable, less hackish and easier to add new features/players. Once we get there, we will merge.
+## EXPERIMENTAL Branch
+
+This is a branch of TorrenTV, a direction towards 1.0, fitter , healthier, more stable, less hackish. And 
+
+ Once we get there, we will merge.
+
+ -- Todo/Features for 1.0:
+
+    - Better Install/Uninstall scripts [WINDOWS]
+    - Support for Magnet files on dock drag/drop  [OSX]
+    - New icons.
+    - New Transparent Dashboard like UI. Dock Menu
+    - Fitter players and devices. Ability to force re-scan devices.
+    - Precache 5% until play
+    - Better torrent Status feedback
+    - Up/Down Stats while downloading.
+    - Play on more than one device at the same time.
+    - Fallback for VLC 
+    - Fallback for a Builtin player.
+    - Support for subtitles on the same torrent
+
+  -- 1.1
+
+    - Suport for webtorrent.
 
 
 --
@@ -14,15 +36,13 @@ stable, less hackish and easier to add new features/players. Once we get there, 
 
 -- 
 
-Stream any Torrent to your AppleTV via AirPlay
-
-Also, there is a Channel to stream to Roku Devices: https://owner.roku.com/add/KHN8M
-
-## Development status:
-
-Working on compatibility for Chromecast and Roku...
+Stream any Torrent or Local Video File to your TV via AirPlay, Chromecast and Roku. Fallback for VLC also.
 
 Visit the project's website at <http://torrentv.github.io>.
+
+# Roku Owners
+
+ - Channel to stream to Roku Devices: https://owner.roku.com/add/KHN8M
 
 #### Quickstart for developers:
 
