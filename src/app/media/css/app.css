@@ -360,7 +360,7 @@ body.message .deviceDiscovery.after {
 }
 
 .torrent-status > .stats {
-    top: 75%;
+    top: 65%;
     position: absolute;
     border-radius: 30px;
     background-color: rgba(0,0,0,0.8);
@@ -372,6 +372,24 @@ body.message .deviceDiscovery.after {
 
 .sofar, .size {
     font-family: 'OsWald';
+}
+
+.torrent-status > .actions {
+    top: 75%;
+    position: absolute;
+    border-radius: 30px;
+    background-color: rgba(0,0,0,0.8);
+    padding: 10px;
+    line-height: 0px;
+    width: 60%;
+    margin: 0% calc( 50% - 30% );
+}
+
+.actions .more_info {
+
+}
+.actions .play_plz {
+
 }
 
 

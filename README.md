@@ -1,6 +1,11 @@
 # [TorrenTv](https://github.com/torrentv/torrentv)
 
+[![node](https://img.shields.io/node/v/gh-badges.svg)]
+[![license](https://img.shields.io/badge/license-GPLv3-blue.svg)]
+
 [![Stories in Ready](https://badge.waffle.io/barrabinfc/TorrenTV.svg?label=ready&title=Ready)](http://waffle.io/barrabinfc/TorrenTV)
+[![issues](https://img.shields.io/github/issues/barrabinfc/torrenTv.svg)]
+
 
 ## EXPERIMENTAL Branch
 
