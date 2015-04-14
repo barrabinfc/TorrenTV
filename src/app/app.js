@@ -128,8 +128,6 @@ TorrenTV.prototype.init = function(options){
             nativeMenuBar.createMacBuiltin('TorrenTV', {'hideEdit': false});
         }
 
-        nativeMenuBar.createMacBuiltin('TorrenTV', {'hideEdit': false});
-
         /*
          * TODO:
 
@@ -262,7 +260,7 @@ TorrenTV.prototype.init = function(options){
             }
         });
 
-        self.devices.on('deviceOff', function(device, device_uri) { 
+        self.devices.on('deviceOff', function(device, device_uri) {
             console.log('deviceOff ', device.name)
             $('#'+device.name).remove();
         });

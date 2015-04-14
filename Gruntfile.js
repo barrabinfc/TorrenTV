@@ -111,10 +111,10 @@ module.exports = function(grunt) {
 				cmd: '"build/cache/<%= nodewebkit.options.version %>/osx64/nwjs.app/Contents/MacOS/nwjs" .'
 			},
 			linux32: {
-				cmd: '"build/cache/<%= nodewebkit.options.version %>/linux32/nwjs" .'
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/linux32/nw" .'
 			},
 			linux64: {
-				cmd: '"build/cache/<%= nodewebkit.options.version %>/linux64/nwjs" .'
+				cmd: '"build/cache/<%= nodewebkit.options.version %>/linux64/nw" .'
 			},
 			createDmg: {
 				cmd: 'dist/mac/yoursway-create-dmg/create-dmg --volname "TorrenTV ' + currentVersion + '" --background ./dist/mac/background.png --window-size 480 540 --icon-size 128 --app-drop-link 240 370 --icon "TorrenTV" 240 110 ./build/releases/TorrenTV/mac/TorrenTV-' + currentVersion + '-Mac.dmg ./build/releases/TorrenTV/mac/'

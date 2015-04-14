@@ -6,7 +6,7 @@ var events = require('events')
 var util = require('util')
 var path = require('path')
 var proc = require('child_process')
-var Q = require('Q')
+var Q = require('q')
 var fs = require('fs')
 
 var registry = require('windows-no-runnable').registry;
